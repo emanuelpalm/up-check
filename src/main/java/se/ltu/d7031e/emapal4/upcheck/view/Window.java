@@ -1,5 +1,8 @@
 package se.ltu.d7031e.emapal4.upcheck.view;
 
+import se.ltu.d7031e.emapal4.upcheck.util.EventBroker;
+import se.ltu.d7031e.emapal4.upcheck.util.EventPublisher;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -10,6 +13,7 @@ import java.awt.event.WindowEvent;
  */
 public class Window {
     private final JFrame frame = new JFrame("UpCheck");
+    private final EventBroker<Void> onClose = new EventBroker<>();
 
     /**
      * Creates new {@link Window} with given {@link View}.
@@ -17,19 +21,20 @@ public class Window {
      * @param view Initial Window {@link View}.
      */
     public Window(final WindowView view) {
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(final WindowEvent e) {
+                SwingUtilities.invokeLater(() -> onClose.publish(null));
+            }
+        });
         setView(view);
     }
 
     /**
-     * @param action Action executed in UI thread after window is closed.
+     * @return Window close event publisher.
      */
-    public void setOnClosing(final Runnable action) {
-        frame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(final WindowEvent e) {
-                SwingUtilities.invokeLater(action);
-            }
-        });
+    public EventPublisher<Void> onClose() {
+        return onClose;
     }
 
     /**
@@ -59,7 +64,7 @@ public class Window {
     static {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
     }

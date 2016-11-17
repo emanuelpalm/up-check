@@ -18,7 +18,7 @@ public class Main {
         System.out.println("UpCheck");
 
         final Window window = new Window(new ViewLocateUppaal());
-        window.setOnClosing(() -> {
+        window.onClose().subscribe(nil -> {
             System.out.println("Bye!");
             System.exit(0);
         });
