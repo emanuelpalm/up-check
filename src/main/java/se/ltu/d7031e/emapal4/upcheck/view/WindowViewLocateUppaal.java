@@ -1,16 +1,22 @@
 package se.ltu.d7031e.emapal4.upcheck.view;
 
+import se.ltu.d7031e.emapal4.upcheck.util.EventBroker;
+import se.ltu.d7031e.emapal4.upcheck.util.EventPublisher;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.Supplier;
 
 /**
- * {@link View} useful for locating a local UPPAAL installation.
+ * {@link WindowView} useful for locating a local UPPAAL installation.
  */
-public class WindowViewLocateUppaal implements WindowView {
+public class WindowViewLocateUppaal implements WindowView, ViewLocateUppaal {
+    private final EventBroker<Path> onConfirmPath = new EventBroker<>();
+
     @Override
     public JPanel panel() throws Exception {
         return new JPanel(new BorderLayout()) {{
@@ -28,23 +34,24 @@ public class WindowViewLocateUppaal implements WindowView {
                 setMinimumSize(new Dimension(100, 80));
             }};
 
-            final Runnable verifyPath = () -> {
+            final Supplier<Path> verifyAndGetPath = () -> {
                 final String pathString = fieldPath.getText();
                 if (pathString == null || pathString.trim().length() == 0) {
                     labelStatus.setText("Please provide a valid UPPAAL folder path.");
-                    return;
+                    return null;
                 }
                 final Path path = new File(pathString).toPath();
                 if (!Files.isDirectory(path)) {
                     labelStatus.setText("Path does not identity a folder.");
-                    return;
+                    return null;
                 }
                 final Path pathLibJar = path.resolve("lib/model.jar");
                 if (!Files.exists(pathLibJar) || !Files.isRegularFile(pathLibJar)) {
                     labelStatus.setText("Path does not identify an eligible UPPAAL folder.");
-                    return;
+                    return null;
                 }
                 labelStatus.setText("");
+                return path;
             };
 
             add(new JPanel(new GridLayout(0, 1)) {{
@@ -99,7 +106,7 @@ public class WindowViewLocateUppaal implements WindowView {
 
                             if (fileChooser.showDialog(root, "Select") == JFileChooser.APPROVE_OPTION) {
                                 fieldPath.setText(fileChooser.getSelectedFile().getAbsolutePath());
-                                SwingUtilities.invokeLater(verifyPath);
+                                SwingUtilities.invokeLater(verifyAndGetPath::get);
                             }
                             fileChooser.setSelectedFile(null);
                         });
@@ -116,7 +123,12 @@ public class WindowViewLocateUppaal implements WindowView {
                     setBorder(Styles.BORDER_EMPTY_FIELD);
                     setFocusPainted(false);
                     setFont(Styles.FONT_PARAGRAPH);
-                    addActionListener(evt -> verifyPath.run());
+                    addActionListener(evt -> {
+                        final Path path = verifyAndGetPath.get();
+                        if (path != null) {
+                            onConfirmPath.publish(path);
+                        }
+                    });
                 }});
             }}, BorderLayout.PAGE_END);
         }};
@@ -125,5 +137,10 @@ public class WindowViewLocateUppaal implements WindowView {
     @Override
     public boolean resizable() {
         return false;
+    }
+
+    @Override
+    public EventPublisher<Path> onConfirmPath() {
+        return onConfirmPath;
     }
 }
