@@ -15,6 +15,9 @@ hs_err_pid*
 /.idea/
 /.gradle/
 
+# Copyright protected files that may not be included in project repository
+/libs/uppaal/
+
 # Temporary files
 *.swp
 *~
