@@ -3,17 +3,14 @@ package se.ltu.d7031e.emapal4.upcheck.view;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.function.Consumer;
 
 /**
  * {@link View} useful for locating a local UPPAAL installation.
  */
-public class ViewLocateUppaal implements WindowView {
+public class WindowViewLocateUppaal implements WindowView {
     @Override
     public JPanel panel() throws Exception {
         return new JPanel(new BorderLayout()) {{

@@ -1,6 +1,6 @@
 package se.ltu.d7031e.emapal4.upcheck;
 
-import se.ltu.d7031e.emapal4.upcheck.view.ViewLocateUppaal;
+import se.ltu.d7031e.emapal4.upcheck.view.WindowViewLocateUppaal;
 import se.ltu.d7031e.emapal4.upcheck.view.Window;
 
 /**
@@ -17,7 +17,7 @@ public class Main {
     public static void main(final String[] args) throws Exception {
         System.out.println("UpCheck");
 
-        final Window window = new Window(new ViewLocateUppaal());
+        final Window window = new Window(new WindowViewLocateUppaal());
         window.onClose().subscribe(nil -> {
             System.out.println("Bye!");
             System.exit(0);
