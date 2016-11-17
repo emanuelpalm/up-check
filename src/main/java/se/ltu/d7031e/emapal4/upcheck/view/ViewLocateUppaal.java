@@ -58,4 +58,9 @@ public class ViewLocateUppaal implements WindowView {
 
         }};
     }
+
+    @Override
+    public boolean resizable() {
+        return false;
+    }
 }

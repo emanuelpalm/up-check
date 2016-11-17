@@ -10,4 +10,9 @@ interface WindowView extends View {
      * @return Swing panel representing {@link View}.
      */
     JPanel panel() throws Exception;
+
+    /**
+     * @return Whether or not the window may be resized.
+     */
+    boolean resizable();
 }

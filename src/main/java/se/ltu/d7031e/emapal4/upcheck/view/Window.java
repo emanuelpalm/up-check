@@ -52,6 +52,7 @@ public class Window {
                 }
                 frame.pack();
                 frame.setMinimumSize(frame.getSize());
+                frame.setResizable(view.resizable());
                 frame.setVisible(true);
 
             } catch (final Throwable e) {
