@@ -50,7 +50,7 @@ public class ViewLocateUppaal implements WindowView {
                 setBorder(Styles.BORDER_EMPTY_MEDIUM);
                 add(Box.createHorizontalGlue());
                 add(new JButton("Confirm") {{
-                    setBorder(Styles.BORDER_EMPTY_BUTTON);
+                    setBorder(Styles.BORDER_EMPTY_FIELD);
                     setFocusPainted(false);
                     setFont(Styles.FONT_PARAGRAPH);
                 }});
