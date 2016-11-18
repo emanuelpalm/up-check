@@ -1,11 +1,11 @@
 package se.ltu.d7031e.emapal4.upcheck.controller;
 
+import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalProxy;
+import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalPathStatus;
 import se.ltu.d7031e.emapal4.upcheck.model.user.UserData;
 import se.ltu.d7031e.emapal4.upcheck.view.ViewLocateUppaal;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Controls interactions between {@link ViewLocateUppaal} instance and model.
@@ -19,9 +19,10 @@ public class ControllerLocateUppaal implements Controller<ViewLocateUppaal> {
             if (pathStatus == ViewLocateUppaal.PathStatus.OK) {
                 UserData.setUppaalPath(pathString);
                 try {
-                    navigator.navigateTo(new ControllerVerifySystem());
+                    final UppaalProxy uppaalProxy = new UppaalProxy(Paths.get(pathString));
+                    navigator.navigateTo(new ControllerVerifySystem(uppaalProxy));
 
-                } catch (final ReflectiveOperationException e) {
+                } catch (final Exception e) {
                     view.showException(e);
                 }
             }
@@ -29,20 +30,19 @@ public class ControllerLocateUppaal implements Controller<ViewLocateUppaal> {
         view.onVerifyPath().subscribe(pathString -> view.setPathStatus(verifyPath(pathString)));
     }
 
-    // TODO: Move to model.
     private ViewLocateUppaal.PathStatus verifyPath(final String pathString) {
-        if (pathString == null || pathString.trim().length() == 0) {
-            return ViewLocateUppaal.PathStatus.NOT_PROVIDED;
+        final UppaalPathStatus pathStatus = UppaalPathStatus.validate(pathString);
+        switch (pathStatus) {
+            case NOT_A_DIRECTORY:
+                return ViewLocateUppaal.PathStatus.NOT_A_DIRECTORY;
+            case NOT_A_UPPAAL_DIRECTORY:
+                return ViewLocateUppaal.PathStatus.NOT_A_UPPAAL_DIRECTORY;
+            case NOT_PROVIDED:
+                return ViewLocateUppaal.PathStatus.NOT_PROVIDED;
+            case OK:
+                return ViewLocateUppaal.PathStatus.OK;
         }
-        final Path path = new File(pathString).toPath();
-        if (!Files.isDirectory(path)) {
-            return ViewLocateUppaal.PathStatus.NOT_DIRECTORY;
-        }
-        final Path pathLibJar = path.resolve("lib/model.jar");
-        if (!Files.exists(pathLibJar) || !Files.isRegularFile(pathLibJar)) {
-            return ViewLocateUppaal.PathStatus.NOT_UPPAAL_DIRECTORY;
-        }
-        return ViewLocateUppaal.PathStatus.OK;
+        throw new IllegalStateException("Unhandled UPPAAL path status: " + pathString);
     }
 
     @Override
