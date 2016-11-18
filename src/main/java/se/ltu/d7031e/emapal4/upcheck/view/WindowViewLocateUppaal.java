@@ -14,6 +14,22 @@ import java.io.File;
 @SuppressWarnings("unused")
 class WindowViewLocateUppaal extends WindowView implements ViewLocateUppaal {
     private final JTextField fieldPath;
+    private final JFileChooser fileChooser = new JFileChooser() {{
+        setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        resetChoosableFileFilters();
+        addChoosableFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(final File f) {
+                return f.isDirectory();
+            }
+
+            @Override
+            public String getDescription() {
+                return "Folder";
+            }
+        });
+        setAcceptAllFileFilterUsed(false);
+    }};
     private final JLabel labelStatus;
     private final JPanel root;
 
@@ -74,22 +90,6 @@ class WindowViewLocateUppaal extends WindowView implements ViewLocateUppaal {
                         setFocusPainted(false);
                         setFont(Styles.FONT_PARAGRAPH);
                         addActionListener(evt -> {
-                            final JFileChooser fileChooser = new JFileChooser();
-                            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                            fileChooser.resetChoosableFileFilters();
-                            fileChooser.addChoosableFileFilter(new FileFilter() {
-                                @Override
-                                public boolean accept(final File f) {
-                                    return f.isDirectory();
-                                }
-
-                                @Override
-                                public String getDescription() {
-                                    return "Folder";
-                                }
-                            });
-                            fileChooser.setAcceptAllFileFilterUsed(false);
-
                             if (fileChooser.showDialog(root, "Select") == JFileChooser.APPROVE_OPTION) {
                                 fieldPath.setText(fileChooser.getSelectedFile().getAbsolutePath());
                                 SwingUtilities.invokeLater(() -> onVerifyPath.publish(fieldPath.getText()));
