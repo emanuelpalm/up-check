@@ -11,6 +11,7 @@ import java.io.File;
 /**
  * {@link WindowView} useful for locating a local UPPAAL installation.
  */
+@SuppressWarnings("unused")
 class WindowViewLocateUppaal extends WindowView implements ViewLocateUppaal {
     private final JTextField fieldPath;
     private final JLabel labelStatus;
@@ -19,7 +20,7 @@ class WindowViewLocateUppaal extends WindowView implements ViewLocateUppaal {
     private final EventBroker<String> onConfirmPath = new EventBroker<>();
     private final EventBroker<String> onVerifyPath = new EventBroker<>();
 
-    public WindowViewLocateUppaal() {
+    WindowViewLocateUppaal() {
         fieldPath = new JTextField() {{
             setBorder(Styles.BORDER_EMPTY_FIELD);
             setFont(Styles.FONT_PARAGRAPH);
