@@ -36,6 +36,7 @@ class Window implements Renderer<WindowView> {
     public void setView(final WindowView view) {
         SwingUtilities.invokeLater(() -> {
             try {
+                frame.setVisible(false);
                 {
                     final Container content = frame.getContentPane();
                     content.removeAll();
