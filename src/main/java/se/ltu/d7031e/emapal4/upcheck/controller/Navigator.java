@@ -1,10 +1,9 @@
 package se.ltu.d7031e.emapal4.upcheck.controller;
 
 import se.ltu.d7031e.emapal4.upcheck.view.Renderer;
+import se.ltu.d7031e.emapal4.upcheck.view.Renderers;
 import se.ltu.d7031e.emapal4.upcheck.view.View;
-import se.ltu.d7031e.emapal4.upcheck.view.Views;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -33,7 +32,7 @@ public class Navigator {
 
     /**
      * Navigates to given {@link Controller}, which replaces the one currently displayed by {@link Renderer}.
-     *
+     * <p>
      * The {@link View} associated with given {@link Controller} may be instantiated via reflection when this method is
      * called. If such an operation would fail, an appropriate exception is thrown.
      *
@@ -46,7 +45,7 @@ public class Navigator {
                 .getClass()
                 .getMethod("register", Navigator.class, viewClass);
 
-        final Object view = Views.newInstance(viewClass);
+        final Object view = Renderers.CreateView(viewClass);
         controllerMethodRegister.invoke(controller, this, view);
         rendererMethodSetView.invoke(renderer, view);
     }
