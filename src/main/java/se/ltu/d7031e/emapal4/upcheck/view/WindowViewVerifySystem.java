@@ -73,14 +73,14 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                     add(new JPanel() {{
                         setBorder(Styles.BORDER_EMPTY_MEDIUM);
                         setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-                        add(new JLabel("Path") {{
+                        add(new JLabel("UPPAAL System") {{
                             setFont(Styles.FONT_PARAGRAPH);
                         }});
                         add(Box.createRigidArea(new Dimension(Styles.SPACING_MEDIUM, 0)));
                         add(Box.createHorizontalGlue());
                         add(fieldPath);
                         add(Box.createRigidArea(new Dimension(Styles.SPACING_MEDIUM, 0)));
-                        add(new JButton("Select ...") {{
+                        add(new JButton("Open ...") {{
                             setBorder(Styles.BORDER_EMPTY_FIELD);
                             setFocusPainted(false);
                             setFont(Styles.FONT_PARAGRAPH);
@@ -115,7 +115,28 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     }
 
     @Override
-    public void setSystemStatus(final SystemStatus status) {
+    public void setSystemPath(final String pathString) {
+        if (pathString == null) {
+            fieldPath.setText("");
+        } else {
+            final File file = new File(pathString);
+            fieldPath.setText(file.getAbsolutePath());
+            fileChooserUppaalSystem.setSelectedFile(file);
+        }
+    }
 
+    @Override
+    public void setSystemStatus(final SystemStatus status) {
+        switch (status) {
+            case NOT_PROVIDED:
+                labelStatus.setText("Please provide a valid UPPAAL system path.");
+                break;
+            case NOT_VALID:
+                labelStatus.setText("Path does not identity a valid UPPAAL system.");
+                break;
+            case OK:
+                labelStatus.setText("");
+                break;
+        }
     }
 }

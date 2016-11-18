@@ -1,7 +1,10 @@
 package se.ltu.d7031e.emapal4.upcheck.controller;
 
 import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalProxy;
+import se.ltu.d7031e.emapal4.upcheck.model.user.UserData;
 import se.ltu.d7031e.emapal4.upcheck.view.ViewVerifySystem;
+
+import java.util.function.Consumer;
 
 /**
  * Controls interactions between {@link ViewVerifySystem} instance and model.
@@ -18,10 +21,18 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
 
     @Override
     public void register(final Navigator navigator, final ViewVerifySystem view) {
-        view.onUppaalSystemPath().subscribe(pathString -> {
-            System.out.println(pathString);
+        final Consumer<String> setSystemPath = path -> {
+            // TODO: Check integrity of path.
+            System.out.println(path);
+            UserData.setSystemPath(path);
+            view.setSystemPath(path);
             view.setSystemStatus(ViewVerifySystem.SystemStatus.OK);
-        });
+        };
+        final String lastSystemPathString = UserData.systemPath();
+        if (lastSystemPathString != null && lastSystemPathString.length() > 0) {
+            setSystemPath.accept(lastSystemPathString);
+        }
+        view.onUppaalSystemPath().subscribe(setSystemPath);
     }
 
     @Override

@@ -12,6 +12,11 @@ public interface ViewVerifySystem extends View {
     EventPublisher<String> onUppaalSystemPath();
 
     /**
+     * @param pathString Path to new currently selected UPPAAL system.
+     */
+    void setSystemPath(final String pathString);
+
+    /**
      * @param status Indication of validity of currently selected UPPAAL system.
      */
     void setSystemStatus(final SystemStatus status);
