@@ -23,7 +23,7 @@ public enum UppaalPathStatus {
      * @return Validation status.
      */
     public static UppaalPathStatus validate(final Path path) {
-        if (path == null || path.getParent() != null) {
+        if (path == null || path.getParent() == null) {
             return NOT_PROVIDED;
         }
         if (!Files.isDirectory(path)) {
