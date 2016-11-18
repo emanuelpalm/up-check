@@ -18,7 +18,12 @@ public class ControllerLocateUppaal implements Controller<ViewLocateUppaal> {
             view.setPathStatus(pathStatus);
             if (pathStatus == ViewLocateUppaal.PathStatus.OK) {
                 UserData.setUppaalPath(pathString);
-                System.out.println("Navigate to next ...");
+                try {
+                    navigator.navigateTo(new ControllerVerifySystem());
+
+                } catch (final ReflectiveOperationException e) {
+                    view.showException(e);
+                }
             }
         });
         view.onVerifyPath().subscribe(pathString -> view.setPathStatus(verifyPath(pathString)));
