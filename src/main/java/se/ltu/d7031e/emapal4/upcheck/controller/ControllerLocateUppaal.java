@@ -1,5 +1,6 @@
 package se.ltu.d7031e.emapal4.upcheck.controller;
 
+import se.ltu.d7031e.emapal4.upcheck.model.UserData;
 import se.ltu.d7031e.emapal4.upcheck.view.ViewLocateUppaal;
 
 import java.io.File;
@@ -16,6 +17,7 @@ public class ControllerLocateUppaal implements Controller<ViewLocateUppaal> {
             final ViewLocateUppaal.PathStatus pathStatus = verifyPath(pathString);
             view.setPathStatus(pathStatus);
             if (pathStatus == ViewLocateUppaal.PathStatus.OK) {
+                UserData.setUppaalPath(pathString);
                 System.out.println("Navigate to next ...");
             }
         });
