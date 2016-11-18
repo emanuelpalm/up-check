@@ -11,7 +11,7 @@ import java.io.File;
 /**
  * {@link WindowView} useful for locating a local UPPAAL installation.
  */
-class WindowViewLocateUppaal implements WindowView, ViewLocateUppaal {
+class WindowViewLocateUppaal extends WindowView implements ViewLocateUppaal {
     private final JTextField fieldPath;
     private final JLabel labelStatus;
     private final JPanel root;
@@ -113,13 +113,8 @@ class WindowViewLocateUppaal implements WindowView, ViewLocateUppaal {
     }
 
     @Override
-    public JPanel panel() throws Exception {
+    public JPanel panel() {
         return root;
-    }
-
-    @Override
-    public boolean resizable() {
-        return false;
     }
 
     @Override
