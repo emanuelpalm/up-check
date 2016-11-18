@@ -18,7 +18,10 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
 
     @Override
     public void register(final Navigator navigator, final ViewVerifySystem view) {
-
+        view.onUppaalSystemPath().subscribe(pathString -> {
+            System.out.println(pathString);
+            view.setSystemStatus(ViewVerifySystem.SystemStatus.OK);
+        });
     }
 
     @Override
