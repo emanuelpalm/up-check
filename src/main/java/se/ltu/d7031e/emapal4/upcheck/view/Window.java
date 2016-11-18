@@ -48,8 +48,7 @@ class Window implements Renderer<WindowView> {
                 frame.setVisible(true);
 
             } catch (final Throwable e) {
-                JOptionPane.showMessageDialog(frame, "Unexpected Application Error", e.getLocalizedMessage(), JOptionPane.ERROR_MESSAGE);
-                throw new RuntimeException(e);
+                showException(e);
             }
         });
     }
@@ -57,6 +56,19 @@ class Window implements Renderer<WindowView> {
     @Override
     public Class<WindowView> viewClass() {
         return WindowView.class;
+    }
+
+    /**
+     * @param e Exception to log and display to application user.
+     */
+    static void showException(final Throwable e) {
+        e.printStackTrace();
+
+        final String message = e.getLocalizedMessage();
+        final String description = (message != null && message.trim().length() > 0)
+                ? message
+                : "An error of type " + e.getClass().getName() + " prevented the operation from completing.";
+        JOptionPane.showMessageDialog(null, description, "Unexpected Application Error", JOptionPane.ERROR_MESSAGE);
     }
 
     static {
