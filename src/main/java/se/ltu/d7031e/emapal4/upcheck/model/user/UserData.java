@@ -53,7 +53,7 @@ public class UserData {
             if (pathString != null) {
                 return pathString;
             }
-            return System.getenv(key);
+            return System.getenv("UPCHECK_" + key);
         }
 
         private static void set(final String key, final String value) {
