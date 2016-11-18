@@ -17,4 +17,9 @@ abstract class WindowView implements View {
     boolean resizable() {
         return false;
     }
+
+    @Override
+    public void showException(final Throwable e) {
+        Window.showException(e);
+    }
 }
