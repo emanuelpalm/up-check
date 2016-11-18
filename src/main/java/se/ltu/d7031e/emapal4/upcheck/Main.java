@@ -1,7 +1,9 @@
 package se.ltu.d7031e.emapal4.upcheck;
 
-import se.ltu.d7031e.emapal4.upcheck.view.WindowViewLocateUppaal;
-import se.ltu.d7031e.emapal4.upcheck.view.Window;
+import se.ltu.d7031e.emapal4.upcheck.controller.ControllerLocateUppaal;
+import se.ltu.d7031e.emapal4.upcheck.controller.Navigator;
+import se.ltu.d7031e.emapal4.upcheck.view.Renderer;
+import se.ltu.d7031e.emapal4.upcheck.view.Renderers;
 
 /**
  * Application main class.
@@ -17,10 +19,13 @@ public class Main {
     public static void main(final String[] args) throws Exception {
         System.out.println("UpCheck");
 
-        final Window window = new Window(new WindowViewLocateUppaal());
-        window.onClose().subscribe(nil -> {
+        final Renderer<?> renderer = Renderers.CreateWindowRenderer();
+        renderer.onClose().subscribe(nil -> {
             System.out.println("Bye!");
             System.exit(0);
         });
+
+        final Navigator navigator = new Navigator(renderer);
+        navigator.navigateTo(new ControllerLocateUppaal());
     }
 }

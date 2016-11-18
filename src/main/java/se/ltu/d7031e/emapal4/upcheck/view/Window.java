@@ -11,37 +11,28 @@ import java.awt.event.WindowEvent;
 /**
  * Holds and renders a single {@link WindowView}.
  */
-public class Window {
+class Window implements Renderer<WindowView> {
     private final JFrame frame = new JFrame("UpCheck");
     private final EventBroker<Void> onClose = new EventBroker<>();
 
     /**
-     * Creates new {@link Window} with given {@link View}.
-     *
-     * @param view Initial Window {@link View}.
+     * Creates new {@link Window}.
      */
-    public Window(final WindowView view) {
+    Window() {
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(final WindowEvent e) {
                 SwingUtilities.invokeLater(() -> onClose.publish(null));
             }
         });
-        setView(view);
     }
 
-    /**
-     * @return Window close event publisher.
-     */
+    @Override
     public EventPublisher<Void> onClose() {
         return onClose;
     }
 
-    /**
-     * Replaces any current {@link WindowView} with given.
-     *
-     * @param view View to set.
-     */
+     @Override
     public void setView(final WindowView view) {
         SwingUtilities.invokeLater(() -> {
             try {
@@ -53,6 +44,7 @@ public class Window {
                 frame.pack();
                 frame.setMinimumSize(frame.getSize());
                 frame.setResizable(view.resizable());
+                frame.setLocationRelativeTo(null);
                 frame.setVisible(true);
 
             } catch (final Throwable e) {
@@ -60,6 +52,11 @@ public class Window {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    @Override
+    public Class<WindowView> viewClass() {
+        return WindowView.class;
     }
 
     static {

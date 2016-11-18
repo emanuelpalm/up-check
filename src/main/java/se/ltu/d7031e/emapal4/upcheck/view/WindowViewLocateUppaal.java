@@ -7,52 +7,35 @@ import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.function.Supplier;
 
 /**
  * {@link WindowView} useful for locating a local UPPAAL installation.
  */
-public class WindowViewLocateUppaal implements WindowView, ViewLocateUppaal {
-    private final EventBroker<Path> onConfirmPath = new EventBroker<>();
+class WindowViewLocateUppaal implements WindowView, ViewLocateUppaal {
+    private final JTextField fieldPath;
+    private final JLabel labelStatus;
+    private final JPanel root;
 
-    @Override
-    public JPanel panel() throws Exception {
-        return new JPanel(new BorderLayout()) {{
+    private final EventBroker<String> onConfirmPath = new EventBroker<>();
+    private final EventBroker<String> onVerifyPath = new EventBroker<>();
+
+    public WindowViewLocateUppaal() {
+        fieldPath = new JTextField() {{
+            setBorder(Styles.BORDER_EMPTY_FIELD);
+            setFont(Styles.FONT_PARAGRAPH);
+        }};
+
+        labelStatus = new JLabel() {{
+            setBorder(Styles.BORDER_EMPTY_MEDIUM);
+            setFont(Styles.FONT_PARAGRAPH);
+            setForeground(Styles.COLOR_ERROR);
+            setMinimumSize(new Dimension(100, 80));
+        }};
+
+        root = new JPanel(new BorderLayout()) {{
             setBackground(Styles.COLOR_BACKGROUND_PRIMARY);
 
             final JPanel root = this;
-            final JTextField fieldPath = new JTextField() {{
-                setBorder(Styles.BORDER_EMPTY_FIELD);
-                setFont(Styles.FONT_PARAGRAPH);
-            }};
-            final JLabel labelStatus = new JLabel() {{
-                setBorder(Styles.BORDER_EMPTY_FIELD);
-                setFont(Styles.FONT_PARAGRAPH);
-                setForeground(Styles.COLOR_ERROR);
-                setMinimumSize(new Dimension(100, 80));
-            }};
-
-            final Supplier<Path> verifyAndGetPath = () -> {
-                final String pathString = fieldPath.getText();
-                if (pathString == null || pathString.trim().length() == 0) {
-                    labelStatus.setText("Please provide a valid UPPAAL folder path.");
-                    return null;
-                }
-                final Path path = new File(pathString).toPath();
-                if (!Files.isDirectory(path)) {
-                    labelStatus.setText("Path does not identity a folder.");
-                    return null;
-                }
-                final Path pathLibJar = path.resolve("lib/model.jar");
-                if (!Files.exists(pathLibJar) || !Files.isRegularFile(pathLibJar)) {
-                    labelStatus.setText("Path does not identify an eligible UPPAAL folder.");
-                    return null;
-                }
-                labelStatus.setText("");
-                return path;
-            };
 
             add(new JPanel(new GridLayout(0, 1)) {{
                 setBackground(Styles.COLOR_BACKGROUND_SECONDARY);
@@ -106,7 +89,7 @@ public class WindowViewLocateUppaal implements WindowView, ViewLocateUppaal {
 
                             if (fileChooser.showDialog(root, "Select") == JFileChooser.APPROVE_OPTION) {
                                 fieldPath.setText(fileChooser.getSelectedFile().getAbsolutePath());
-                                SwingUtilities.invokeLater(verifyAndGetPath::get);
+                                SwingUtilities.invokeLater(() -> onVerifyPath.publish(fieldPath.getText()));
                             }
                             fileChooser.setSelectedFile(null);
                         });
@@ -123,15 +106,15 @@ public class WindowViewLocateUppaal implements WindowView, ViewLocateUppaal {
                     setBorder(Styles.BORDER_EMPTY_FIELD);
                     setFocusPainted(false);
                     setFont(Styles.FONT_PARAGRAPH);
-                    addActionListener(evt -> {
-                        final Path path = verifyAndGetPath.get();
-                        if (path != null) {
-                            onConfirmPath.publish(path);
-                        }
-                    });
+                    addActionListener(evt -> onConfirmPath.publish(fieldPath.getText()));
                 }});
             }}, BorderLayout.PAGE_END);
         }};
+    }
+
+    @Override
+    public JPanel panel() throws Exception {
+        return root;
     }
 
     @Override
@@ -140,7 +123,30 @@ public class WindowViewLocateUppaal implements WindowView, ViewLocateUppaal {
     }
 
     @Override
-    public EventPublisher<Path> onConfirmPath() {
+    public EventPublisher<String> onConfirmPath() {
         return onConfirmPath;
+    }
+
+    @Override
+    public EventPublisher<String> onVerifyPath() {
+        return onVerifyPath;
+    }
+
+    @Override
+    public void setPathStatus(final PathStatus status) {
+        switch (status) {
+            case NOT_PROVIDED:
+                labelStatus.setText("Please provide a valid UPPAAL folder path.");
+                break;
+            case NOT_DIRECTORY:
+                labelStatus.setText("Path does not identity a folder.");
+                break;
+            case NOT_UPPAAL_DIRECTORY:
+                labelStatus.setText("Path does not identify an eligible UPPAAL folder.");
+                break;
+            case OK:
+                labelStatus.setText("");
+                break;
+        }
     }
 }
