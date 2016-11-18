@@ -38,9 +38,11 @@ class WindowViewLocateUppaal extends WindowView implements ViewLocateUppaal {
 
             final JPanel root = this;
 
-            add(new JPanel(new GridLayout(0, 1)) {{
+            add(new JPanel() {{
                 setBackground(Styles.COLOR_BACKGROUND_SECONDARY);
+                setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
                 add(new JLabel("Locate UPPAAL Installation") {{
+                    setAlignmentX(Component.LEFT_ALIGNMENT);
                     setBorder(Styles.BORDER_EMPTY_MEDIUM);
                     setFont(Styles.FONT_HEADING1);
                     setForeground(Styles.COLOR_FOREGROUND_SECONDARY);
@@ -49,6 +51,7 @@ class WindowViewLocateUppaal extends WindowView implements ViewLocateUppaal {
                         "<p>In order for UpCheck to be functional, a local UPPAAL installation must be known.</p>" +
                         "<p>Please provide a path to a UPPAAL root folder.</p>" +
                         "</html>") {{
+                    setAlignmentX(Component.LEFT_ALIGNMENT);
                     setBorder(Styles.BORDER_EMPTY_MEDIUM_NO_TOP);
                     setFont(Styles.FONT_PARAGRAPH);
                     setForeground(Styles.COLOR_FOREGROUND_SECONDARY);
@@ -60,7 +63,6 @@ class WindowViewLocateUppaal extends WindowView implements ViewLocateUppaal {
                     setBorder(Styles.BORDER_EMPTY_MEDIUM);
                     setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
                     add(new JLabel("Path") {{
-                        setBorder(Styles.BORDER_EMPTY_FIELD);
                         setFont(Styles.FONT_PARAGRAPH);
                     }});
                     add(Box.createRigidArea(new Dimension(Styles.SPACING_MEDIUM, 0)));
