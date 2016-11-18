@@ -133,10 +133,10 @@ class WindowViewLocateUppaal extends WindowView implements ViewLocateUppaal {
             case NOT_PROVIDED:
                 labelStatus.setText("Please provide a valid UPPAAL folder path.");
                 break;
-            case NOT_DIRECTORY:
+            case NOT_A_DIRECTORY:
                 labelStatus.setText("Path does not identity a folder.");
                 break;
-            case NOT_UPPAAL_DIRECTORY:
+            case NOT_A_UPPAAL_DIRECTORY:
                 labelStatus.setText("Path does not identify an eligible UPPAAL folder.");
                 break;
             case OK:

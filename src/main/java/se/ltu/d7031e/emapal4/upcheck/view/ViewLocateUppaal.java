@@ -25,9 +25,9 @@ public interface ViewLocateUppaal extends View {
      * Indicates validity status of some selected UPPAAL installation path.
      */
     enum PathStatus {
-        NOT_DIRECTORY,
+        NOT_A_DIRECTORY,
+        NOT_A_UPPAAL_DIRECTORY,
         NOT_PROVIDED,
-        NOT_UPPAAL_DIRECTORY,
         OK,
     }
 }
