@@ -1,4 +1,4 @@
-package se.ltu.d7031e.emapal4.upcheck.model;
+package se.ltu.d7031e.emapal4.upcheck.model.user;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

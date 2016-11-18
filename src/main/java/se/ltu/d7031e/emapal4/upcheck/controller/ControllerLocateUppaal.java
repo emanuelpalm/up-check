@@ -1,6 +1,6 @@
 package se.ltu.d7031e.emapal4.upcheck.controller;
 
-import se.ltu.d7031e.emapal4.upcheck.model.UserData;
+import se.ltu.d7031e.emapal4.upcheck.model.user.UserData;
 import se.ltu.d7031e.emapal4.upcheck.view.ViewLocateUppaal;
 
 import java.io.File;
