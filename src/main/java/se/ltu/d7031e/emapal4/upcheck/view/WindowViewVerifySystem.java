@@ -5,6 +5,7 @@ import javax.swing.*;
 /**
  * {@link WindowView} useful for verifying UPPAAL system integrity.
  */
+@SuppressWarnings("unused")
 class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     @Override
     public JPanel panel() {
