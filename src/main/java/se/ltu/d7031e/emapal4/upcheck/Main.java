@@ -1,9 +1,15 @@
 package se.ltu.d7031e.emapal4.upcheck;
 
 import se.ltu.d7031e.emapal4.upcheck.controller.ControllerLocateUppaal;
+import se.ltu.d7031e.emapal4.upcheck.controller.ControllerVerifySystem;
 import se.ltu.d7031e.emapal4.upcheck.controller.Navigator;
+import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalPathStatus;
+import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalProxy;
+import se.ltu.d7031e.emapal4.upcheck.model.user.UserData;
 import se.ltu.d7031e.emapal4.upcheck.view.Renderer;
 import se.ltu.d7031e.emapal4.upcheck.view.Renderers;
+
+import java.nio.file.Paths;
 
 /**
  * Application main class.
@@ -26,6 +32,14 @@ public class Main {
         });
 
         final Navigator navigator = new Navigator(renderer);
-        navigator.navigateTo(new ControllerLocateUppaal());
+
+        final String pathToUppaalInstallation = UserData.uppaalPath();
+        if (UppaalPathStatus.validate(pathToUppaalInstallation) == UppaalPathStatus.OK) {
+            final UppaalProxy uppaalProxy = new UppaalProxy(Paths.get(pathToUppaalInstallation));
+            final ControllerVerifySystem controllerVerifySystem = new ControllerVerifySystem(uppaalProxy);
+            navigator.navigateTo(controllerVerifySystem);
+        } else {
+            navigator.navigateTo(new ControllerLocateUppaal());
+        }
     }
 }
