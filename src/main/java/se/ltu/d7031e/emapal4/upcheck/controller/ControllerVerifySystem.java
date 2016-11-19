@@ -1,6 +1,7 @@
 package se.ltu.d7031e.emapal4.upcheck.controller;
 
 import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalProxy;
+import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalProxyException;
 import se.ltu.d7031e.emapal4.upcheck.model.user.UserData;
 import se.ltu.d7031e.emapal4.upcheck.view.ViewVerifySystem;
 
@@ -21,12 +22,29 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
 
     @Override
     public void register(final Navigator navigator, final ViewVerifySystem view) {
-        final Consumer<String> setSystemPath = path -> {
-            // TODO: Check integrity of path.
-            System.out.println(path);
-            UserData.setUppaalSystemPath(path);
-            view.setSystemPath(path);
-            view.setSystemStatus(ViewVerifySystem.SystemStatus.OK);
+        final Consumer<String> setSystemPath = pathString -> {
+            try {
+                uppaalProxy.setSystemByPath(pathString);
+
+                UserData.setUppaalSystemPath(pathString);
+                view.setSystemPath(pathString);
+                view.setSystemStatus(ViewVerifySystem.SystemStatus.OK);
+
+            } catch (final UppaalProxyException e) {
+                switch (e.status()) {
+                    case SYSTEM_NOT_FOUND:
+                        view.setSystemStatus(ViewVerifySystem.SystemStatus.NOT_FOUND);
+                        break;
+                    case SYSTEM_NOT_VALID:
+                        view.setSystemStatus(ViewVerifySystem.SystemStatus.NOT_VALID);
+                        break;
+                    case SYSTEM_NOT_PROVIDED:
+                        view.setSystemStatus(ViewVerifySystem.SystemStatus.NOT_PROVIDED);
+                        break;
+                    default:
+                        view.showException(e);
+                }
+            }
         };
         final String lastSystemPathString = UserData.uppaalSystemPath();
         if (lastSystemPathString != null && lastSystemPathString.length() > 0) {
