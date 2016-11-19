@@ -15,35 +15,35 @@ import java.util.Properties;
  * Keeps track of application user data.
  */
 public class UserData {
-    private static final String KEY_SYSTEM_PATH = "SYSTEM_PATH";
-    private static final String KEY_UPPAAL_PATH = "UPPAAL_PATH";
+    private static final String KEY_UPPAAL_SYSTEM_PATH = "UPPAAL_SYSTEM_PATH";
+    private static final String KEY_UPPAAL_FOLDER_ROOT = "UPPAAL_FOLDER_ROOT";
 
     /**
      * @return Path to last viewed UPPAAL system, if any.
      */
-    public static String systemPath() {
-        return UserProperties.get(KEY_SYSTEM_PATH);
+    public static String uppaalSystemPath() {
+        return UserProperties.get(KEY_UPPAAL_SYSTEM_PATH);
     }
 
     /**
      * @return Path to local UPPAAL installation, if any known.
      */
-    public static String uppaalPath() {
-        return UserProperties.get(KEY_UPPAAL_PATH);
+    public static String uppaalFolderRoot() {
+        return UserProperties.get(KEY_UPPAAL_FOLDER_ROOT);
     }
 
     /**
      * @param pathString New last viewed UPPAAL system path to set.
      */
-    public static void setSystemPath(final String pathString) {
-        UserProperties.set(KEY_SYSTEM_PATH, pathString);
+    public static void setUppaalSystemPath(final String pathString) {
+        UserProperties.set(KEY_UPPAAL_SYSTEM_PATH, pathString);
     }
 
     /**
      * @param pathString New UPPAAL path to set.
      */
-    public static void setUppaalPath(final String pathString) {
-        UserProperties.set(KEY_UPPAAL_PATH, pathString);
+    public static void setUppaalFolderRoot(final String pathString) {
+        UserProperties.set(KEY_UPPAAL_FOLDER_ROOT, pathString);
     }
 
     private static class UserProperties {

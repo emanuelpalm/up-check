@@ -24,11 +24,11 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
         final Consumer<String> setSystemPath = path -> {
             // TODO: Check integrity of path.
             System.out.println(path);
-            UserData.setSystemPath(path);
+            UserData.setUppaalSystemPath(path);
             view.setSystemPath(path);
             view.setSystemStatus(ViewVerifySystem.SystemStatus.OK);
         };
-        final String lastSystemPathString = UserData.systemPath();
+        final String lastSystemPathString = UserData.uppaalSystemPath();
         if (lastSystemPathString != null && lastSystemPathString.length() > 0) {
             setSystemPath.accept(lastSystemPathString);
         }

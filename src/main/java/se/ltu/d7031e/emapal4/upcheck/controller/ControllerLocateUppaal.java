@@ -7,8 +7,6 @@ import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalFolderStatus;
 import se.ltu.d7031e.emapal4.upcheck.model.user.UserData;
 import se.ltu.d7031e.emapal4.upcheck.view.ViewLocateUppaal;
 
-import java.nio.file.Paths;
-
 /**
  * Controls interactions between {@link ViewLocateUppaal} instance and model.
  */
@@ -20,7 +18,7 @@ public class ControllerLocateUppaal implements Controller<ViewLocateUppaal> {
                 final UppaalFolder uppaalFolder = UppaalFolder.create(pathString);
                 final UppaalProxy uppaalProxy = new UppaalProxy(uppaalFolder);
 
-                UserData.setUppaalPath(pathString);
+                UserData.setUppaalFolderRoot(pathString);
                 navigator.navigateTo(new ControllerVerifySystem(uppaalProxy));
 
             } catch (final UppaalFolderException e) {

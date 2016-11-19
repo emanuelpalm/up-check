@@ -31,10 +31,9 @@ public class Main {
         });
 
         final Navigator navigator = new Navigator(renderer);
-
-        final String pathToUppaalInstallation = UserData.uppaalPath();
         try {
-            final UppaalFolder uppaalFolder = UppaalFolder.create(pathToUppaalInstallation);
+            final String uppaalPath = UserData.uppaalFolderRoot();
+            final UppaalFolder uppaalFolder = UppaalFolder.create(uppaalPath);
             final UppaalProxy uppaalProxy = new UppaalProxy(uppaalFolder);
             final ControllerVerifySystem controllerVerifySystem = new ControllerVerifySystem(uppaalProxy);
             navigator.navigateTo(controllerVerifySystem);
