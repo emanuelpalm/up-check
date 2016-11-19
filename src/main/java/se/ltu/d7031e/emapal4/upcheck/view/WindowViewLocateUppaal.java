@@ -55,7 +55,7 @@ class WindowViewLocateUppaal extends WindowView implements ViewLocateUppaal {
             final JPanel root = this;
 
             add(new JPanel() {{
-                setBackground(Styles.COLOR_BACKGROUND_SECONDARY);
+                setBackground(Styles.COLOR_ERROR);
                 setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
                 add(new JLabel("Locate UPPAAL Installation") {{
                     setAlignmentX(Component.LEFT_ALIGNMENT);
