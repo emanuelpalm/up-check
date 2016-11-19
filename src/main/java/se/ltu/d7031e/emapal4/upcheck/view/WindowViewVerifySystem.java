@@ -128,6 +128,9 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     @Override
     public void setSystemStatus(final SystemStatus status) {
         switch (status) {
+            case NOT_FOUND:
+                labelStatus.setText("Path does not identity an existing file.");
+                break;
             case NOT_PROVIDED:
                 labelStatus.setText("Please provide a valid UPPAAL system path.");
                 break;

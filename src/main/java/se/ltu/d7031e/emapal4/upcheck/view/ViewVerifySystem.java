@@ -25,6 +25,7 @@ public interface ViewVerifySystem extends View {
      * Indicates validity status of some selected UPPAAL system.
      */
     enum SystemStatus {
+        NOT_FOUND,
         NOT_PROVIDED,
         NOT_VALID,
         OK,
