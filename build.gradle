@@ -12,7 +12,7 @@ dependencies {
     // Due to copyright reasons, this file is not included in the repository.
     // In order to compile this project, you need to download UPPAAL 4.* from
     // either http://uppaal.com or http://uppaal.org. Copy the lib/model.jar
-    // file from the distribution to the location below in order to compile.
+    // file from the distribution to the location below.
     compile files('libs/uppaal/model.jar')
 
     compile 'org.reflections:reflections:0.9.10'
