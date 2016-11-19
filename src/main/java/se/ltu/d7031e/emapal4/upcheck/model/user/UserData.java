@@ -1,5 +1,7 @@
 package se.ltu.d7031e.emapal4.upcheck.model.user;
 
+import se.ltu.d7031e.emapal4.upcheck.util.OsFactory;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -72,18 +74,22 @@ public class UserData {
         }
 
         static {
-            final String os = (System.getProperty("os.name")).toUpperCase();
-            if (os.contains("WIN"))
-            {
-                path = Paths.get(System.getenv("AppData"), "UpCheck", "configuration.xml");
-            }
-            else if (os.contains("DARWIN"))
-            {
-                path = Paths.get(System.getProperty("user.home"), "Library", "Application Support", "UpCheck", "configuration.xml");
-            }
-            else {
-                path = Paths.get(System.getProperty("user.home"), ".upcheckrc");
-            }
+            path = new OsFactory<Path>() {
+                @Override
+                protected Path createOnMacOsX() {
+                    return Paths.get(System.getProperty("user.home"), "Library", "Application Support", "UpCheck", "configuration.xml");
+                }
+
+                @Override
+                protected Path createOnWindows() {
+                    return Paths.get(System.getenv("AppData"), "UpCheck", "configuration.xml");
+                }
+
+                @Override
+                protected Path createOnOther() {
+                    return Paths.get(System.getProperty("user.home"), ".upcheckrc");
+                }
+            }.create();
             try {
                 if (Files.exists(path)) {
                     properties.loadFromXML(Files.newInputStream(path));
