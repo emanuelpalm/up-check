@@ -1,7 +1,9 @@
 package se.ltu.d7031e.emapal4.upcheck.controller;
 
+import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalFolder;
+import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalFolderException;
 import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalProxy;
-import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalPathStatus;
+import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalFolderStatus;
 import se.ltu.d7031e.emapal4.upcheck.model.user.UserData;
 import se.ltu.d7031e.emapal4.upcheck.view.ViewLocateUppaal;
 
@@ -14,25 +16,28 @@ public class ControllerLocateUppaal implements Controller<ViewLocateUppaal> {
     @Override
     public void register(final Navigator navigator, final ViewLocateUppaal view) {
         view.onConfirmPath().subscribe(pathString -> {
-            final ViewLocateUppaal.PathStatus pathStatus = verifyPath(pathString);
-            view.setPathStatus(pathStatus);
-            if (pathStatus == ViewLocateUppaal.PathStatus.OK) {
-                UserData.setUppaalPath(pathString);
-                try {
-                    final UppaalProxy uppaalProxy = new UppaalProxy(Paths.get(pathString));
-                    navigator.navigateTo(new ControllerVerifySystem(uppaalProxy));
+            try {
+                final UppaalFolder uppaalFolder = UppaalFolder.create(pathString);
+                final UppaalProxy uppaalProxy = new UppaalProxy(uppaalFolder);
 
-                } catch (final Exception e) {
-                    view.showException(e);
-                }
+                UserData.setUppaalPath(pathString);
+                navigator.navigateTo(new ControllerVerifySystem(uppaalProxy));
+
+            } catch (final UppaalFolderException e) {
+                view.setPathStatus(toPathStatus(e.status()));
+
+            } catch (final Exception e) {
+                view.showException(e);
             }
         });
-        view.onVerifyPath().subscribe(pathString -> view.setPathStatus(verifyPath(pathString)));
+        view.onVerifyPath().subscribe(pathString -> {
+            final UppaalFolderStatus status = UppaalFolder.validate(pathString);
+            view.setPathStatus(toPathStatus(status));
+        });
     }
 
-    private ViewLocateUppaal.PathStatus verifyPath(final String pathString) {
-        final UppaalPathStatus pathStatus = UppaalPathStatus.validate(pathString);
-        switch (pathStatus) {
+    private ViewLocateUppaal.PathStatus toPathStatus(final UppaalFolderStatus status) {
+        switch (status) {
             case NOT_A_DIRECTORY:
                 return ViewLocateUppaal.PathStatus.NOT_A_DIRECTORY;
             case NOT_A_UPPAAL_DIRECTORY:
@@ -42,7 +47,7 @@ public class ControllerLocateUppaal implements Controller<ViewLocateUppaal> {
             case OK:
                 return ViewLocateUppaal.PathStatus.OK;
         }
-        throw new IllegalStateException("Unhandled UPPAAL path status: " + pathString);
+        throw new IllegalStateException("Unhandled UPPAAL path status: " + status);
     }
 
     @Override

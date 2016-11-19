@@ -3,13 +3,12 @@ package se.ltu.d7031e.emapal4.upcheck;
 import se.ltu.d7031e.emapal4.upcheck.controller.ControllerLocateUppaal;
 import se.ltu.d7031e.emapal4.upcheck.controller.ControllerVerifySystem;
 import se.ltu.d7031e.emapal4.upcheck.controller.Navigator;
-import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalPathStatus;
+import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalFolder;
+import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalFolderException;
 import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalProxy;
 import se.ltu.d7031e.emapal4.upcheck.model.user.UserData;
 import se.ltu.d7031e.emapal4.upcheck.view.Renderer;
 import se.ltu.d7031e.emapal4.upcheck.view.Renderers;
-
-import java.nio.file.Paths;
 
 /**
  * Application main class.
@@ -34,11 +33,13 @@ public class Main {
         final Navigator navigator = new Navigator(renderer);
 
         final String pathToUppaalInstallation = UserData.uppaalPath();
-        if (UppaalPathStatus.validate(pathToUppaalInstallation) == UppaalPathStatus.OK) {
-            final UppaalProxy uppaalProxy = new UppaalProxy(Paths.get(pathToUppaalInstallation));
+        try {
+            final UppaalFolder uppaalFolder = UppaalFolder.create(pathToUppaalInstallation);
+            final UppaalProxy uppaalProxy = new UppaalProxy(uppaalFolder);
             final ControllerVerifySystem controllerVerifySystem = new ControllerVerifySystem(uppaalProxy);
             navigator.navigateTo(controllerVerifySystem);
-        } else {
+
+        } catch (final UppaalFolderException e) {
             navigator.navigateTo(new ControllerLocateUppaal());
         }
     }
