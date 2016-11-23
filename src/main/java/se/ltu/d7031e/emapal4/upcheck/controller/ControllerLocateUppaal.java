@@ -24,7 +24,7 @@ public class ControllerLocateUppaal implements Controller<ViewLocateUppaal> {
             } catch (final UppaalFolderException e) {
                 view.setPathStatus(toPathStatus(e.status()));
 
-            } catch (final Exception e) {
+            } catch (final Throwable e) {
                 view.showException(null, e);
             }
         });
