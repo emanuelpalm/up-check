@@ -10,13 +10,12 @@ import java.nio.file.Paths;
  * Represents a local UPPAAL installation folder.
  */
 public class UppaalFolder {
-    private final Path root;
-    private final Path serverExe;
-    private final Path modelJar;
+    private final Path binServerExe;
+    private final Path libModelJar;
+    private final Path uppaalJar;
 
     private UppaalFolder(final Path root) {
-        this.root = root;
-        this.serverExe = new OsFactory<Path>() {
+        this.binServerExe = new OsFactory<Path>() {
             @Override
             protected Path createOnLinux() {
                 return root.resolve("bin-Linux/server");
@@ -32,7 +31,7 @@ public class UppaalFolder {
                 return root.resolve("bin-Win32\\server.exe");
             }
         }.create();
-        this.modelJar = new OsFactory<Path>() {
+        this.libModelJar = new OsFactory<Path>() {
             @Override
             protected Path createOnLinux() {
                 return root.resolve("lib/model.jar");
@@ -46,6 +45,22 @@ public class UppaalFolder {
             @Override
             protected Path createOnWindows() {
                 return root.resolve("lib\\model.jar");
+            }
+        }.create();
+        this.uppaalJar = new OsFactory<Path>() {
+            @Override
+            protected Path createOnLinux() {
+                return root.resolve("uppaal.jar");
+            }
+
+            @Override
+            protected Path createOnMacOsX() {
+                return root.resolve("UPPAAL.app/Contents/Resources/Java/uppaal.jar");
+            }
+
+            @Override
+            protected Path createOnWindows() {
+                return root.resolve("uppaal.jar");
             }
         }.create();
     }
@@ -73,7 +88,9 @@ public class UppaalFolder {
     }
 
     private boolean containsRequiredFiles() {
-        return Files.exists(serverExe()) && Files.exists(modelJar());
+        return Files.exists(binServerExe())
+                && Files.exists(libModelJar())
+                && Files.exists(uppaalJar());
     }
 
     /**
@@ -93,23 +110,23 @@ public class UppaalFolder {
     }
 
     /**
-     * Path to folder root.
-     */
-    public Path root() {
-        return root;
-    }
-
-    /**
      * Path to server executable.
      */
-    public Path serverExe() {
-        return serverExe;
+    public Path binServerExe() {
+        return binServerExe;
     }
 
     /**
      * Path to model JAR archive.
      */
-    public Path modelJar() {
-        return modelJar;
+    public Path libModelJar() {
+        return libModelJar;
+    }
+
+    /**
+     * Path to UPPAAL base JAR archive.
+     */
+    public Path uppaalJar() {
+        return uppaalJar;
     }
 }
