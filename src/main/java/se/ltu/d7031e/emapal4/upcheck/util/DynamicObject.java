@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
  * Wraps an object, providing a facade of reflection helpers.
  */
 public class DynamicObject {
-    private static final ConcurrentHashMap<Class<?>, ConcurrentHashMap<String, Method>> mapClassToMethods = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Class<?>, ConcurrentHashMap<String, Method>> mapClassToMethods = new ConcurrentHashMap<>(8);
 
     private final Object object;
     private final Map<String, Method> objectMethods;
@@ -20,7 +20,7 @@ public class DynamicObject {
      */
     public DynamicObject(final Object object) {
         this.object = object;
-        objectMethods = mapClassToMethods.computeIfAbsent(object.getClass(), objectClass -> new ConcurrentHashMap<>());
+        objectMethods = mapClassToMethods.computeIfAbsent(object.getClass(), objectClass -> new ConcurrentHashMap<>(4));
     }
 
     /**
