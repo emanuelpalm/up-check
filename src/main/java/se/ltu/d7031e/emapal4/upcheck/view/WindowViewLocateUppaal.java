@@ -106,7 +106,7 @@ class WindowViewLocateUppaal extends WindowView implements ViewLocateUppaal {
                 setBorder(Styles.BORDER_EMPTY_MEDIUM);
                 add(Box.createHorizontalGlue());
                 add(new JButton("Confirm") {{
-                    setBorder(Styles.BORDER_EMPTY_FIELD);
+                    setBorder(Styles.BORDER_EMPTY_MEDIUM);
                     setFocusPainted(false);
                     setFont(Styles.FONT_PARAGRAPH);
                     addActionListener(evt -> onConfirmPath.publish(fieldPath.getText()));
