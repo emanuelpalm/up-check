@@ -6,6 +6,7 @@ import se.ltu.d7031e.emapal4.upcheck.controller.Navigator;
 import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalFolder;
 import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalFolderException;
 import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalProxy;
+import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalProxyException;
 import se.ltu.d7031e.emapal4.upcheck.model.user.UserData;
 import se.ltu.d7031e.emapal4.upcheck.view.Renderer;
 import se.ltu.d7031e.emapal4.upcheck.view.Renderers;
@@ -40,6 +41,14 @@ public class Main {
 
         } catch (final UppaalFolderException e) {
             navigator.navigateTo(new ControllerLocateUppaal());
+
+        } catch (final UppaalProxyException e) {
+            renderer.showException(null, e);
+            navigator.navigateTo(new ControllerLocateUppaal());
+
+        } catch (final Throwable e) {
+            renderer.showException(null, e);
+            System.exit(1);
         }
     }
 }
