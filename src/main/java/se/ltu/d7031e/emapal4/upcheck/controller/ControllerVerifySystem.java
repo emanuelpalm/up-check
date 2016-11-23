@@ -51,6 +51,8 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                     default:
                         view.showException(null, e);
                 }
+            } catch (final Throwable e) {
+                view.showException(null, e);
             }
         };
         final String lastSystemPathString = UserData.uppaalSystemPath();
