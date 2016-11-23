@@ -36,13 +36,13 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
 
     public WindowViewVerifySystem() {
         fieldPath = new JTextField() {{
-            setBorder(Styles.BORDER_EMPTY_FIELD);
-            setFont(Styles.FONT_PARAGRAPH);
+            setBorder(Styles.BORDER_EMPTY_FIELD_SMALL);
+            setFont(Styles.FONT_SMALL);
         }};
 
         labelStatus = new JLabel() {{
             setBorder(Styles.BORDER_EMPTY_MEDIUM);
-            setFont(Styles.FONT_PARAGRAPH);
+            setFont(Styles.FONT_SMALL);
             setForeground(Styles.COLOR_ERROR);
             setMinimumSize(new Dimension(100, 80));
         }};
@@ -58,12 +58,6 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                 add(new JLabel("Verify UPPAAL System Integrity") {{
                     setAlignmentX(Component.LEFT_ALIGNMENT);
                     setBorder(Styles.BORDER_EMPTY_MEDIUM);
-                    setFont(Styles.FONT_HEADING1);
-                    setForeground(Styles.COLOR_FOREGROUND_SECONDARY);
-                }});
-                add(new JLabel("Please provide a path to a local UPPAAL system.") {{
-                    setAlignmentX(Component.LEFT_ALIGNMENT);
-                    setBorder(Styles.BORDER_EMPTY_MEDIUM_NO_TOP);
                     setFont(Styles.FONT_PARAGRAPH);
                     setForeground(Styles.COLOR_FOREGROUND_SECONDARY);
                 }});
@@ -71,19 +65,19 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                     setAlignmentX(Component.LEFT_ALIGNMENT);
                     setBackground(Styles.COLOR_BACKGROUND_PRIMARY);
                     add(new JPanel() {{
-                        setBorder(Styles.BORDER_EMPTY_MEDIUM);
+                        setBorder(Styles.BORDER_EMPTY_FIELD_SMALL);
                         setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
                         add(new JLabel("UPPAAL System") {{
-                            setFont(Styles.FONT_PARAGRAPH);
+                            setFont(Styles.FONT_SMALL);
                         }});
-                        add(Box.createRigidArea(new Dimension(Styles.SPACING_MEDIUM, 0)));
+                        add(Box.createRigidArea(new Dimension(Styles.SPACING_SMALL, 0)));
                         add(Box.createHorizontalGlue());
                         add(fieldPath);
-                        add(Box.createRigidArea(new Dimension(Styles.SPACING_MEDIUM, 0)));
+                        add(Box.createRigidArea(new Dimension(Styles.SPACING_SMALL, 0)));
                         add(new JButton("Open ...") {{
-                            setBorder(Styles.BORDER_EMPTY_FIELD);
+                            setBorder(Styles.BORDER_EMPTY_FIELD_SMALL);
                             setFocusPainted(false);
-                            setFont(Styles.FONT_PARAGRAPH);
+                            setFont(Styles.FONT_SMALL);
                             addActionListener(evt -> {
                                 if (fileChooserUppaalSystem.showDialog(root, "Open System") == JFileChooser.APPROVE_OPTION) {
                                     fieldPath.setText(fileChooserUppaalSystem.getSelectedFile().getAbsolutePath());
