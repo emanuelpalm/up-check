@@ -39,6 +39,20 @@ public class UppaalProxy {
         this.uppaalFolder = uppaalFolder;
     }
 
-    public void setSystemByPath(final String systemPathString) throws UppaalProxyException {
+    /**
+     * Loads UPPAAL system from file at given path.
+     *
+     * @param pathString identifies local filesystem location where UPPAAL system is located
+     * @return object useful for interacting with UPPAAL system
+     * @throws UppaalProxyException Thrown if failing to resolve provided path
+     */
+    public UppaalSystem loadSystemAt(final String pathString) throws UppaalProxyException {
+        try {
+            final DynamicObject prototypeDocument = dynamicFactory.create("com.uppaal.model.core2.PrototypeDocument");
+            return new UppaalSystem(prototypeDocument.invoke("load", Paths.get(pathString).toUri().toURL()));
+
+        } catch (final MalformedURLException e) {
+            throw new UppaalProxyException(UppaalProxyStatus.SYSTEM_NOT_FOUND, e);
+        }
     }
 }

@@ -2,9 +2,11 @@ package se.ltu.d7031e.emapal4.upcheck.controller;
 
 import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalProxy;
 import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalProxyException;
+import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalSystem;
 import se.ltu.d7031e.emapal4.upcheck.model.user.UserData;
 import se.ltu.d7031e.emapal4.upcheck.view.ViewVerifySystem;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -22,9 +24,11 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
 
     @Override
     public void register(final Navigator navigator, final ViewVerifySystem view) {
+        final AtomicReference<UppaalSystem> atomicUppaalSystem = new AtomicReference<>();
+
         final Consumer<String> setSystemPath = pathString -> {
             try {
-                uppaalProxy.setSystemByPath(pathString);
+                atomicUppaalSystem.set(uppaalProxy.loadSystemAt(pathString));
 
                 UserData.setUppaalSystemPath(pathString);
                 view.setSystemPath(pathString);
