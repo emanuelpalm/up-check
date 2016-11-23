@@ -25,7 +25,7 @@ public class ControllerLocateUppaal implements Controller<ViewLocateUppaal> {
                 view.setPathStatus(toPathStatus(e.status()));
 
             } catch (final Exception e) {
-                view.showException(e);
+                view.showException(null, e);
             }
         });
         view.onVerifyPath().subscribe(pathString -> {

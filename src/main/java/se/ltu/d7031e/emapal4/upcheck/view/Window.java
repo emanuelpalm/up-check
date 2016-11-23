@@ -7,6 +7,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.util.Optional;
 
 /**
  * Holds and renders a single {@link WindowView}.
@@ -32,7 +35,7 @@ class Window implements Renderer<WindowView> {
         return onClose;
     }
 
-     @Override
+    @Override
     public void setView(final WindowView view) {
         SwingUtilities.invokeLater(() -> {
             try {
@@ -49,7 +52,7 @@ class Window implements Renderer<WindowView> {
                 frame.setVisible(true);
 
             } catch (final Throwable e) {
-                showException(e);
+                showException(null, e);
             }
         });
     }
@@ -60,16 +63,31 @@ class Window implements Renderer<WindowView> {
     }
 
     /**
+     * @param message Message to display to application user.
      * @param e Exception to log and display to application user.
      */
-    static void showException(final Throwable e) {
+    @Override
+    public void showException(final String message, final Throwable e) {
+        showExceptionInternal(message, e);
+    }
+
+    static void showExceptionInternal(String message, final Throwable e) {
         e.printStackTrace();
 
-        final String message = e.getLocalizedMessage();
-        final String description = (message != null && message.trim().length() > 0)
-                ? message
-                : "An error of type " + e.getClass().getName() + " prevented the operation from completing.";
-        JOptionPane.showMessageDialog(null, description, "Unexpected Application Error", JOptionPane.ERROR_MESSAGE);
+        message = Optional
+                .ofNullable(message)
+                .orElse(Optional.ofNullable(e.getLocalizedMessage())
+                        .orElse("An error of type " + e.getClass().getName() + " prevented the operation from completing."));
+
+        final ByteArrayOutputStream stackTraceStream = new ByteArrayOutputStream();
+        e.printStackTrace(new PrintStream(stackTraceStream));
+
+        new WindowDialogError()
+                .title("Unexpected Application Error")
+                .message(message)
+                .details("<html><b>Details:<br /></b><pre>" + stackTraceStream.toString() + "</pre><html>")
+                .isModal(true)
+                .show();
     }
 
     static {

@@ -42,7 +42,7 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                         view.setSystemStatus(ViewVerifySystem.SystemStatus.NOT_PROVIDED);
                         break;
                     default:
-                        view.showException(e);
+                        view.showException(null, e);
                 }
             }
         };

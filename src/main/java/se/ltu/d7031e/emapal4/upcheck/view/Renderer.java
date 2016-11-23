@@ -19,6 +19,12 @@ public interface Renderer<V extends View> {
     void setView(final V view);
 
     /**
+     * @param message Error message to be displayed to application user.
+     * @param e       Exception to be displayed to application user.
+     */
+    void showException(final String message, final Throwable e);
+
+    /**
      * @return Rendered {@link View} class.
      */
     Class<V> viewClass();

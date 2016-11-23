@@ -19,7 +19,7 @@ abstract class WindowView implements View {
     }
 
     @Override
-    public void showException(final Throwable e) {
-        Window.showException(e);
+    public void showException(final String message, final Throwable e) {
+        Window.showExceptionInternal(message, e);
     }
 }
