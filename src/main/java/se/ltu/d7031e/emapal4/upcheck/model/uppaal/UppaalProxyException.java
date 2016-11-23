@@ -14,6 +14,14 @@ public class UppaalProxyException extends Exception {
     }
 
     /**
+     * Creates new exception with provided UPPAAL proxy status and cause.
+     */
+    UppaalProxyException(final UppaalProxyStatus status, final Throwable cause) {
+        super(cause);
+        this.status = status;
+    }
+
+    /**
      * @return UPPAAL proxy status.
      */
     public UppaalProxyStatus status() {

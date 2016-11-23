@@ -32,6 +32,9 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
 
             } catch (final UppaalProxyException e) {
                 switch (e.status()) {
+                    case ENGINE_NOT_CONNECTED:
+                        view.showException("Failed to connect to UPPAAL engine.", e.getCause());
+                        break;
                     case SYSTEM_NOT_FOUND:
                         view.setSystemStatus(ViewVerifySystem.SystemStatus.NOT_FOUND);
                         break;
