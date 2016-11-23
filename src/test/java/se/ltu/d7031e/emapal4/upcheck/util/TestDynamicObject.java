@@ -14,6 +14,6 @@ public class TestDynamicObject {
         assertEquals("0", wrappedInteger.unwrap().toString());
 
         assertEquals(5, wrappedInteger.method("addAndGet", int.class).invoke(5));
-        assertEquals(6, wrappedInteger.invoke("incrementAndGet"));
+        assertEquals(6, wrappedInteger.invoke("incrementAndGet").unwrap());
     }
 }

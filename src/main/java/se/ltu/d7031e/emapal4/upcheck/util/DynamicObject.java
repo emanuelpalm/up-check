@@ -37,15 +37,18 @@ public class DynamicObject {
      *
      * @param methodName name of invoked method
      * @param arguments  arbitrary arguments
-     * @return value returned by invoked method
+     * @return wrapped value returned by invoked method, or {@code null}
      */
-    public Object invoke(final String methodName, final Object... arguments) {
+    public DynamicObject invoke(final String methodName, final Object... arguments) {
         final DynamicMethod method = method(methodName, Arrays.stream(arguments)
                 .map(Object::getClass)
                 .collect(Collectors.toList())
                 .toArray(new Class<?>[arguments.length]));
 
-        return method.invoke(arguments);
+        final Object result = method.invoke(arguments);
+        return result != null
+                ? new DynamicObject(result)
+                : null;
     }
 
     /**
