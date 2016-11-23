@@ -1,6 +1,5 @@
 package se.ltu.d7031e.emapal4.upcheck.model.uppaal;
 
-import se.ltu.d7031e.emapal4.upcheck.util.DynamicException;
 import se.ltu.d7031e.emapal4.upcheck.util.DynamicFactory;
 import se.ltu.d7031e.emapal4.upcheck.util.DynamicObject;
 
@@ -15,7 +14,6 @@ import java.nio.file.Paths;
 public class UppaalProxy {
     private final DynamicFactory dynamicFactory;
     private final DynamicObject engine;
-    private final UppaalFolder uppaalFolder;
 
     /**
      * Creates new UPPAAL proxy object.
@@ -36,7 +34,6 @@ public class UppaalProxy {
         } catch (final Throwable e) {
             throw new UppaalProxyException(UppaalProxyStatus.ENGINE_NOT_CONNECTED, e);
         }
-        this.uppaalFolder = uppaalFolder;
     }
 
     /**
