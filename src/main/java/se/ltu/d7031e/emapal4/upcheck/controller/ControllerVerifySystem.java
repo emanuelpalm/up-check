@@ -28,12 +28,13 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
         final AtomicReference<UppaalSystem> atomicUppaalSystem = new AtomicReference<>();
 
         final Consumer<String> setSystemPath = pathString -> {
+            final String name = Paths.get(pathString).getFileName().toString();
             try {
                 atomicUppaalSystem.set(uppaalProxy.loadSystemAt(pathString));
 
                 UserData.setUppaalSystemPath(pathString);
                 view.setSystemPath(pathString);
-                view.setSystemStatus(ViewVerifySystem.Status.OK, Paths.get(pathString).getFileName().toString());
+                view.setSystemStatus(ViewVerifySystem.Status.OK, name);
 
             } catch (final UppaalProxyException e) {
                 switch (e.status()) {
@@ -41,13 +42,13 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                         view.showException("Failed to connect to UPPAAL engine.", e.getCause());
                         break;
                     case SYSTEM_NOT_FOUND:
-                        view.setSystemStatus(ViewVerifySystem.Status.NOT_FOUND, null);
+                        view.setSystemStatus(ViewVerifySystem.Status.NOT_FOUND, name);
                         break;
                     case SYSTEM_NOT_VALID:
-                        view.setSystemStatus(ViewVerifySystem.Status.NOT_VALID, null);
+                        view.setSystemStatus(ViewVerifySystem.Status.NOT_VALID, name);
                         break;
                     case SYSTEM_NOT_PROVIDED:
-                        view.setSystemStatus(ViewVerifySystem.Status.NOT_PROVIDED, null);
+                        view.setSystemStatus(ViewVerifySystem.Status.NOT_PROVIDED, name);
                         break;
                     default:
                         view.showException(null, e);

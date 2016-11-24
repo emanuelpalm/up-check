@@ -77,10 +77,10 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                         setForeground(Styles.COLOR_FOREGROUND_SECONDARY);
                     }});
                     add(Box.createHorizontalGlue());
-                    add(new JButton("Select ...") {{
+                    add(new JButton("Load ...") {{
                         setFocusPainted(false);
                         addActionListener(evt -> {
-                            if (fileChooserSystem.showDialog(root, "Select System") == JFileChooser.APPROVE_OPTION) {
+                            if (fileChooserSystem.showDialog(root, "Load System") == JFileChooser.APPROVE_OPTION) {
                                 final String selectedPath = fileChooserSystem.getSelectedFile().getAbsolutePath();
                                 SwingUtilities.invokeLater(() -> onSystemPath.publish(selectedPath));
                             }
@@ -219,38 +219,50 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
 
     @Override
     public void setSystemPath(final String pathString) {
-        final boolean isSet = pathString != null;
-        if (isSet) {
+        if (pathString != null) {
             final File file = new File(pathString);
             fileChooserSystem.setSelectedFile(file);
             fileChooserQueries.setSelectedFile(file.getParentFile());
         }
-        buttonQueriesLoad.setEnabled(isSet);
-        buttonQueriesSaveAs.setEnabled(isSet);
-        textAreaQueries.setEnabled(isSet);
-        buttonReportGenerate.setEnabled(isSet);
     }
 
     @Override
     public void setSystemStatus(final Status status, final String systemName) {
+        if (status == Status.OK) {
+            setSystemStatusOK(systemName);
+        } else {
+            setSystemStatusError(status, systemName);
+        }
+    }
+
+    private void setSystemStatusError(final Status status, final String systemName) {
         switch (status) {
             case NOT_FOUND:
-                labelSystemStatus.setForeground(Styles.COLOR_ERROR);
-                labelSystemStatus.setText("Path does not identity an existing file.");
+                labelSystemStatus.setText("Selected path does not identity an existing file.");
                 break;
             case NOT_PROVIDED:
-                labelSystemStatus.setForeground(Styles.COLOR_ERROR);
                 labelSystemStatus.setText("Please provide a valid UPPAAL system path.");
                 break;
             case NOT_VALID:
-                labelSystemStatus.setForeground(Styles.COLOR_ERROR);
-                labelSystemStatus.setText("Path does not identity a valid UPPAAL system.");
+                labelSystemStatus.setText("'" + systemName + "' contains errors and could not be loaded.");
                 break;
-            case OK:
-                labelSystemStatus.setForeground(Styles.COLOR_FOREGROUND_PRIMARY);
-                labelSystemStatus.setText(systemName + " ");
-                break;
+            default:
+                throw new IllegalStateException("Unhandled status: " + status);
         }
+        labelSystemStatus.setForeground(Styles.COLOR_ERROR);
+        buttonQueriesLoad.setEnabled(false);
+        buttonQueriesSaveAs.setEnabled(false);
+        textAreaQueries.setEnabled(false);
+        buttonReportGenerate.setEnabled(false);
+    }
+
+    private void setSystemStatusOK(final String systemName) {
+        labelSystemStatus.setForeground(Styles.COLOR_FOREGROUND_PRIMARY);
+        labelSystemStatus.setText(systemName + " ");
+        buttonQueriesLoad.setEnabled(true);
+        buttonQueriesSaveAs.setEnabled(true);
+        textAreaQueries.setEnabled(true);
+        buttonReportGenerate.setEnabled(true);
     }
 
     @Override

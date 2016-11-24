@@ -3,12 +3,12 @@ package se.ltu.d7031e.emapal4.upcheck.model.uppaal;
 import se.ltu.d7031e.emapal4.upcheck.util.DynamicObject;
 
 /**
- * Created by emanuel on 11/23/16.
+ * Represents some UPPAAL system.
  */
 public class UppaalSystem {
-    private final DynamicObject document;
+    private final DynamicObject uppaalSystem;
 
-    UppaalSystem(final DynamicObject document) {
-        this.document = document;
+    UppaalSystem(final DynamicObject uppaalSystem) {
+        this.uppaalSystem = uppaalSystem;
     }
 }
