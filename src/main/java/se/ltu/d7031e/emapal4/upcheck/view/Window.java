@@ -45,6 +45,7 @@ class Window implements Renderer<WindowView> {
                     content.removeAll();
                     content.add(view.panel());
                 }
+                frame.setMinimumSize(new Dimension(10, 10));
                 frame.pack();
                 frame.setMinimumSize(frame.getSize());
                 frame.setResizable(view.resizable());
