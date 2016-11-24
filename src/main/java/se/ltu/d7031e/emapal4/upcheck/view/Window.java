@@ -2,6 +2,7 @@ package se.ltu.d7031e.emapal4.upcheck.view;
 
 import se.ltu.d7031e.emapal4.upcheck.util.EventBroker;
 import se.ltu.d7031e.emapal4.upcheck.util.EventPublisher;
+import se.ltu.d7031e.emapal4.upcheck.util.ResourceLoader;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,13 +10,23 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.Optional;
 
 /**
  * Holds and renders a single {@link WindowView}.
  */
 class Window implements Renderer<WindowView> {
-    private final JFrame frame = new JFrame("UpCheck");
+    private final JFrame frame = new JFrame("UpCheck") {{
+        setIconImages(Arrays.asList(
+                ResourceLoader.loadImage("icon/icon_16x16.png"),
+                ResourceLoader.loadImage("icon/icon_32x32.png"),
+                ResourceLoader.loadImage("icon/icon_64x64.png"),
+                ResourceLoader.loadImage("icon/icon_128x128.png"),
+                ResourceLoader.loadImage("icon/icon_192x192.png"),
+                ResourceLoader.loadImage("icon/icon_256x256.png")
+        ));
+    }};
     private final EventBroker<Void> onClose = new EventBroker<>();
 
     /**
