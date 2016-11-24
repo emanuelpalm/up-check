@@ -19,14 +19,14 @@ class Styles {
     static final Color COLOR_FOREGROUND_PRIMARY = new Color(28, 28, 28);
     static final Color COLOR_FOREGROUND_SECONDARY = new Color(255, 255, 255);
 
-    static final Font FONT_ERROR = new Font("Sans", Font.BOLD, 16);
-    static final Font FONT_HEADING1 = new Font("Sans", Font.PLAIN, 32);
-    static final Font FONT_PARAGRAPH = new Font("Sans", Font.PLAIN, 16);
-    static final Font FONT_SMALL = new Font("Sans", Font.PLAIN, 11);
-    static final Font FONT_SMALL_BOLD = new Font("Sans", Font.BOLD, 11);
+    static final Font FONT_ERROR = new Font(Font.SANS_SERIF, Font.BOLD, 16);
+    static final Font FONT_HEADING1 = new Font(Font.SANS_SERIF, Font.PLAIN, 32);
+    static final Font FONT_PARAGRAPH = new Font(Font.SANS_SERIF, Font.PLAIN, 16);
+    static final Font FONT_SMALL = new Font(Font.SANS_SERIF, Font.PLAIN, 11);
+    static final Font FONT_MONOSPACED = new Font(Font.MONOSPACED, Font.PLAIN, 12);
 
     static final int SPACING_SMALLER = 6;
-    static final int SPACING_SMALL = 10;
+    static final int SPACING_SMALL = 8;
     static final int SPACING_MEDIUM = 16;
 
     static {

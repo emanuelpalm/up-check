@@ -89,10 +89,7 @@ class WindowViewLocateUppaal extends WindowView implements ViewLocateUppaal {
     private final EventBroker<String> onVerifyPath = new EventBroker<>();
 
     WindowViewLocateUppaal() {
-        fieldPath = new JTextField() {{
-            setBorder(Styles.BORDER_EMPTY_FIELD);
-            setFont(Styles.FONT_PARAGRAPH);
-        }};
+        fieldPath = new JTextField();
 
         labelStatus = new JLabel() {{
             setBorder(Styles.BORDER_EMPTY_MEDIUM);
@@ -130,17 +127,13 @@ class WindowViewLocateUppaal extends WindowView implements ViewLocateUppaal {
                 add(new JPanel() {{
                     setBorder(Styles.BORDER_EMPTY_MEDIUM);
                     setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-                    add(new JLabel("Path") {{
-                        setFont(Styles.FONT_PARAGRAPH);
-                    }});
+                    add(new JLabel("Path"));
                     add(Box.createRigidArea(new Dimension(Styles.SPACING_MEDIUM, 0)));
                     add(Box.createHorizontalGlue());
                     add(fieldPath);
                     add(Box.createRigidArea(new Dimension(Styles.SPACING_MEDIUM, 0)));
                     add(new JButton("Select ...") {{
-                        setBorder(Styles.BORDER_EMPTY_FIELD);
                         setFocusPainted(false);
-                        setFont(Styles.FONT_PARAGRAPH);
                         addActionListener(evt -> {
                             if (fileChooser.showDialog(root, "Select") == JFileChooser.APPROVE_OPTION) {
                                 fieldPath.setText(fileChooser.getSelectedFile().getAbsolutePath());
@@ -158,9 +151,7 @@ class WindowViewLocateUppaal extends WindowView implements ViewLocateUppaal {
                 setBorder(Styles.BORDER_EMPTY_MEDIUM);
                 add(Box.createHorizontalGlue());
                 add(new JButton("Confirm") {{
-                    setBorder(Styles.BORDER_EMPTY_MEDIUM);
                     setFocusPainted(false);
-                    setFont(Styles.FONT_PARAGRAPH);
                     addActionListener(evt -> onConfirmPath.publish(fieldPath.getText()));
                 }});
             }}, BorderLayout.PAGE_END);

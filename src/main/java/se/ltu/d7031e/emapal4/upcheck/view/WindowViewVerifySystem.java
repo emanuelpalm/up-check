@@ -74,14 +74,11 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                     setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
                     add(new JLabel("UPPAAL System") {{
                         setAlignmentX(Component.LEFT_ALIGNMENT);
-                        setFont(Styles.FONT_SMALL);
                         setForeground(Styles.COLOR_FOREGROUND_SECONDARY);
                     }});
                     add(Box.createHorizontalGlue());
                     add(new JButton("Select ...") {{
-                        setBorder(Styles.BORDER_EMPTY_FIELD_SMALL);
                         setFocusPainted(false);
-                        setFont(Styles.FONT_SMALL);
                         addActionListener(evt -> {
                             if (fileChooserSystem.showDialog(root, "Select System") == JFileChooser.APPROVE_OPTION) {
                                 final String selectedPath = fileChooserSystem.getSelectedFile().getAbsolutePath();
@@ -94,10 +91,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                     setBorder(Styles.BORDER_EMPTY_SMALL);
                     setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
                     setOpaque(false);
-                    add(labelSystemStatus = new JLabel() {{
-                        setFont(Styles.FONT_SMALL_BOLD);
-                        setText(" ");
-                    }});
+                    add(labelSystemStatus = new JLabel(" "));
                     add(Box.createHorizontalGlue());
                 }});
             }}, BorderLayout.NORTH);
@@ -111,16 +105,13 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                         setMaximumSize(new Dimension(Integer.MAX_VALUE, (int) getPreferredSize().getHeight()));
                         add(new JLabel("System Queries") {{
                             setAlignmentX(Component.LEFT_ALIGNMENT);
-                            setFont(Styles.FONT_SMALL);
                             setForeground(Styles.COLOR_FOREGROUND_SECONDARY);
                         }});
                         add(Box.createHorizontalGlue());
                         add(Box.createHorizontalStrut(Styles.SPACING_SMALL));
                         add(buttonQueriesLoad = new JButton("Load ...") {{
-                            setBorder(Styles.BORDER_EMPTY_FIELD_SMALL);
                             setEnabled(false);
                             setFocusPainted(false);
-                            setFont(Styles.FONT_SMALL);
                             addActionListener(evt -> {
                                 if (fileChooserQueries.showDialog(root, "Load Queries") == JFileChooser.APPROVE_OPTION) {
                                     final String selectedPath = fileChooserQueries.getSelectedFile().getAbsolutePath();
@@ -130,18 +121,14 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                         }});
                         add(Box.createHorizontalStrut(Styles.SPACING_SMALL));
                         add(buttonQueriesSave = new JButton("Save") {{
-                            setBorder(Styles.BORDER_EMPTY_FIELD_SMALL);
                             setEnabled(false);
                             setFocusPainted(false);
-                            setFont(Styles.FONT_SMALL);
                             addActionListener(evt -> onQueriesPath.publish(fileChooserQueries.getSelectedFile().getAbsolutePath()));
                         }});
                         add(Box.createHorizontalStrut(Styles.SPACING_SMALL));
                         add(buttonQueriesSaveAs = new JButton("Save as ...") {{
-                            setBorder(Styles.BORDER_EMPTY_FIELD_SMALL);
                             setEnabled(false);
                             setFocusPainted(false);
-                            setFont(Styles.FONT_SMALL);
                             addActionListener(evt -> {
                                 if (fileChooserQueries.showDialog(root, "Save Queries") == JFileChooser.APPROVE_OPTION) {
                                     final String selectedPath = fileChooserQueries.getSelectedFile().getAbsolutePath();
@@ -154,10 +141,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                         setBorder(Styles.BORDER_EMPTY_SMALL);
                         setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
                         setOpaque(false);
-                        add(labelQueriesStatus = new JLabel() {{
-                            setFont(Styles.FONT_SMALL_BOLD);
-                            setText(" ");
-                        }});
+                        add(labelQueriesStatus = new JLabel(" "));
                         add(Box.createHorizontalGlue());
                     }});
                     add(new JPanel() {{
@@ -166,7 +150,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                             setBorder(Styles.BORDER_EMPTY_SMALL);
                             setEnabled(false);
                             setLineWrap(true);
-                            setFont(Styles.FONT_SMALL);
+                            setFont(Styles.FONT_MONOSPACED);
                             setRows(8);
                         }}, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER) {{
                             setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -182,15 +166,12 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                         setMaximumSize(new Dimension(Integer.MAX_VALUE, (int) getPreferredSize().getHeight()));
                         add(new JLabel("System Report") {{
                             setAlignmentX(Component.LEFT_ALIGNMENT);
-                            setFont(Styles.FONT_SMALL);
                             setForeground(Styles.COLOR_FOREGROUND_SECONDARY);
                         }});
                         add(Box.createHorizontalGlue());
                         add(buttonReportGenerate = new JButton("Generate") {{
-                            setBorder(Styles.BORDER_EMPTY_FIELD_SMALL);
                             setEnabled(false);
                             setFocusPainted(false);
-                            setFont(Styles.FONT_SMALL);
                         }});
                     }});
                     add(new JPanel() {{
@@ -200,7 +181,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                             setEditable(false);
                             setEnabled(false);
                             setLineWrap(true);
-                            setFont(Styles.FONT_SMALL);
+                            setFont(Styles.FONT_MONOSPACED);
                             setRows(8);
                         }}, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER) {{
                             setAlignmentX(Component.LEFT_ALIGNMENT);
