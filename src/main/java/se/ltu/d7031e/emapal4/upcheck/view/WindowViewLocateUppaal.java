@@ -2,11 +2,16 @@ package se.ltu.d7031e.emapal4.upcheck.view;
 
 import se.ltu.d7031e.emapal4.upcheck.util.EventBroker;
 import se.ltu.d7031e.emapal4.upcheck.util.EventPublisher;
+import se.ltu.d7031e.emapal4.upcheck.util.OsFactory;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * {@link WindowView} useful for locating a local UPPAAL installation.
@@ -14,22 +19,69 @@ import java.io.File;
 @SuppressWarnings("unused")
 class WindowViewLocateUppaal extends WindowView implements ViewLocateUppaal {
     private final JTextField fieldPath;
-    private final JFileChooser fileChooser = new JFileChooser() {{
-        setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        resetChoosableFileFilters();
-        addChoosableFileFilter(new FileFilter() {
-            @Override
-            public boolean accept(final File f) {
-                return f.isDirectory();
-            }
+    private final JFileChooser fileChooser = new OsFactory<JFileChooser>() {
+        @Override
+        protected JFileChooser createOnMacOsX() {
+            return new JFileChooser() {
+                {
+                    final FileFilter fileFilter = new FileFilter() {
+                        @Override
+                        public boolean accept(final File f) {
+                            return f.isDirectory() || (f.isFile() && f.getName().endsWith(".app"));
+                        }
 
-            @Override
-            public String getDescription() {
-                return "Folder";
-            }
-        });
-        setAcceptAllFileFilterUsed(false);
-    }};
+                        @Override
+                        public String getDescription() {
+                            return "UPPAAL application (.app)";
+                        }
+                    };
+                    addChoosableFileFilter(fileFilter);
+                    setFileFilter(fileFilter);
+                }
+
+                @Override
+                public void setSelectedFile(File file) {
+                    if (file != null) {
+                        final Path path = file.toPath();
+                        if (!Files.exists(path)) {
+                            final String name = file.toString();
+                            try {
+                                file = Files.find(path.getParent(), 1, (p, attr) -> p.toString().startsWith(name))
+                                        .findFirst()
+                                        .map(Path::toFile)
+                                        .orElse(file);
+
+                            } catch (final IOException e) {
+                                throw new UncheckedIOException(e);
+                            }
+                        }
+                    }
+                    super.setSelectedFile(file);
+                }
+            };
+        }
+
+        @Override
+        protected JFileChooser createOnOther() {
+            return new JFileChooser() {{
+                setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                resetChoosableFileFilters();
+                addChoosableFileFilter(new FileFilter() {
+                    @Override
+                    public boolean accept(final File f) {
+                        return f.isDirectory();
+                    }
+
+                    @Override
+                    public String getDescription() {
+                        return "Folder";
+                    }
+                });
+                setAcceptAllFileFilterUsed(false);
+            }};
+        }
+    }.create();
+
     private final JLabel labelStatus;
     private final JPanel root;
 

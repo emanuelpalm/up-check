@@ -39,7 +39,7 @@ public class UppaalFolder {
 
             @Override
             protected Path createOnMacOsX() {
-                return root.resolve("Contents/Resources/Java/model.jar");
+                return root.resolve("Contents/Java/model.jar");
             }
 
             @Override
@@ -55,7 +55,7 @@ public class UppaalFolder {
 
             @Override
             protected Path createOnMacOsX() {
-                return root.resolve("Contents/Resources/Java/uppaal.jar");
+                return root.resolve("Contents/Java/uppaal.jar");
             }
 
             @Override
