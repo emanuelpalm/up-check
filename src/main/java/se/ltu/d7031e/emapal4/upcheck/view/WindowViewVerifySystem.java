@@ -13,7 +13,7 @@ import java.io.File;
  */
 @SuppressWarnings("unused")
 class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
-    private final JFileChooser fileChooserUppaalSystem = new JFileChooser() {{
+    private final JFileChooser fileChooserSystem = new JFileChooser() {{
         final FileFilter fileFilter = new FileFilter() {
             @Override
             public boolean accept(final File f) {
@@ -22,7 +22,22 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
 
             @Override
             public String getDescription() {
-                return "UPPAAL System";
+                return "UPPAAL System (.xml)";
+            }
+        };
+        addChoosableFileFilter(fileFilter);
+        setFileFilter(fileFilter);
+    }};
+    private final JFileChooser fileChooserQueries = new JFileChooser() {{
+        final FileFilter fileFilter = new FileFilter() {
+            @Override
+            public boolean accept(final File f) {
+                return f.isDirectory() || (f.isFile() && f.getName().endsWith(".q"));
+            }
+
+            @Override
+            public String getDescription() {
+                return "UPPAAL Queries File (.q)";
             }
         };
         addChoosableFileFilter(fileFilter);
@@ -30,12 +45,19 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     }};
 
     private final JPanel root;
-    private final EventBroker<String> onUppaalSystemPath = new EventBroker<>();
+    private final EventBroker<String> onSystemPath = new EventBroker<>();
+    private final EventBroker<String> onQueriesPath = new EventBroker<>();
+    private final EventBroker<String> onQueriesSave = new EventBroker<>();
 
     private JLabel labelSystemStatus;
+
+    private JButton buttonQueriesLoad;
+    private JButton buttonQueriesSave;
+    private JButton buttonQueriesSaveAs;
     private JLabel labelQueriesStatus;
-    private JLabel labelReportStatus;
     private JTextArea textAreaQueries;
+
+    private JButton buttonReportGenerate;
     private JTextArea textAreaReport;
 
     public WindowViewVerifySystem() {
@@ -61,11 +83,10 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                         setFocusPainted(false);
                         setFont(Styles.FONT_SMALL);
                         addActionListener(evt -> {
-                            if (fileChooserUppaalSystem.showDialog(root, "Select System") == JFileChooser.APPROVE_OPTION) {
-                                final String selectedPath = fileChooserUppaalSystem.getSelectedFile().getAbsolutePath();
-                                SwingUtilities.invokeLater(() -> onUppaalSystemPath.publish(selectedPath));
+                            if (fileChooserSystem.showDialog(root, "Select System") == JFileChooser.APPROVE_OPTION) {
+                                final String selectedPath = fileChooserSystem.getSelectedFile().getAbsolutePath();
+                                SwingUtilities.invokeLater(() -> onSystemPath.publish(selectedPath));
                             }
-                            fileChooserUppaalSystem.setSelectedFile(null);
                         });
                     }});
                 }});
@@ -95,25 +116,38 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                         }});
                         add(Box.createHorizontalGlue());
                         add(Box.createHorizontalStrut(Styles.SPACING_SMALL));
-                        add(new JButton("Load ...") {{
+                        add(buttonQueriesLoad = new JButton("Load ...") {{
                             setBorder(Styles.BORDER_EMPTY_FIELD_SMALL);
                             setEnabled(false);
                             setFocusPainted(false);
                             setFont(Styles.FONT_SMALL);
+                            addActionListener(evt -> {
+                                if (fileChooserQueries.showDialog(root, "Load Queries") == JFileChooser.APPROVE_OPTION) {
+                                    final String selectedPath = fileChooserQueries.getSelectedFile().getAbsolutePath();
+                                    SwingUtilities.invokeLater(() -> onQueriesPath.publish(selectedPath));
+                                }
+                            });
                         }});
                         add(Box.createHorizontalStrut(Styles.SPACING_SMALL));
-                        add(new JButton("Save") {{
+                        add(buttonQueriesSave = new JButton("Save") {{
                             setBorder(Styles.BORDER_EMPTY_FIELD_SMALL);
                             setEnabled(false);
                             setFocusPainted(false);
                             setFont(Styles.FONT_SMALL);
+                            addActionListener(evt -> onQueriesPath.publish(fileChooserQueries.getSelectedFile().getAbsolutePath()));
                         }});
                         add(Box.createHorizontalStrut(Styles.SPACING_SMALL));
-                        add(new JButton("Save as ...") {{
+                        add(buttonQueriesSaveAs = new JButton("Save as ...") {{
                             setBorder(Styles.BORDER_EMPTY_FIELD_SMALL);
                             setEnabled(false);
                             setFocusPainted(false);
                             setFont(Styles.FONT_SMALL);
+                            addActionListener(evt -> {
+                                if (fileChooserQueries.showDialog(root, "Save Queries") == JFileChooser.APPROVE_OPTION) {
+                                    final String selectedPath = fileChooserQueries.getSelectedFile().getAbsolutePath();
+                                    SwingUtilities.invokeLater(() -> onQueriesSave.publish(selectedPath));
+                                }
+                            });
                         }});
                     }});
                     add(new JPanel() {{
@@ -131,7 +165,6 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                         add(new JScrollPane(textAreaQueries = new JTextArea() {{
                             setBorder(Styles.BORDER_EMPTY_SMALL);
                             setEnabled(false);
-                            setEditable(false);
                             setLineWrap(true);
                             setFont(Styles.FONT_SMALL);
                             setRows(8);
@@ -153,22 +186,12 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                             setForeground(Styles.COLOR_FOREGROUND_SECONDARY);
                         }});
                         add(Box.createHorizontalGlue());
-                        add(new JButton("Generate") {{
+                        add(buttonReportGenerate = new JButton("Generate") {{
                             setBorder(Styles.BORDER_EMPTY_FIELD_SMALL);
                             setEnabled(false);
                             setFocusPainted(false);
                             setFont(Styles.FONT_SMALL);
                         }});
-                    }});
-                    add(new JPanel() {{
-                        setBorder(Styles.BORDER_EMPTY_SMALL);
-                        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-                        setOpaque(false);
-                        add(labelReportStatus = new JLabel() {{
-                            setFont(Styles.FONT_SMALL_BOLD);
-                            setText(" ");
-                        }});
-                        add(Box.createHorizontalGlue());
                     }});
                     add(new JPanel() {{
                         setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
@@ -199,19 +222,36 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     }
 
     @Override
-    public EventPublisher<String> onUppaalSystemPath() {
-        return onUppaalSystemPath;
+    public EventPublisher<String> onSystemPath() {
+        return onSystemPath;
+    }
+
+    @Override
+    public EventPublisher<String> onQueriesPath() {
+        return onQueriesPath;
+    }
+
+    @Override
+    public EventPublisher<String> onQueriesSave() {
+        return onQueriesSave;
     }
 
     @Override
     public void setSystemPath(final String pathString) {
-        if (pathString != null) {
-            fileChooserUppaalSystem.setSelectedFile(new File(pathString));
+        final boolean isSet = pathString != null;
+        if (isSet) {
+            final File file = new File(pathString);
+            fileChooserSystem.setSelectedFile(file);
+            fileChooserQueries.setSelectedFile(file.getParentFile());
         }
+        buttonQueriesLoad.setEnabled(isSet);
+        buttonQueriesSaveAs.setEnabled(isSet);
+        textAreaQueries.setEnabled(isSet);
+        buttonReportGenerate.setEnabled(isSet);
     }
 
     @Override
-    public void setSystemStatus(final SystemStatus status, final String systemName) {
+    public void setSystemStatus(final Status status, final String systemName) {
         switch (status) {
             case NOT_FOUND:
                 labelSystemStatus.setForeground(Styles.COLOR_ERROR);
@@ -230,5 +270,42 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                 labelSystemStatus.setText(systemName + " ");
                 break;
         }
+    }
+
+    @Override
+    public void setQueriesPath(final String pathString) {
+        final boolean isSet = pathString != null;
+        if (isSet) {
+            fileChooserQueries.setSelectedFile(new File(pathString));
+        }
+        buttonQueriesSave.setEnabled(isSet);
+    }
+
+    @Override
+    public void setQueriesStatus(final Status status, final String queriesName) {
+        switch (status) {
+            case NOT_FOUND:
+                labelQueriesStatus.setForeground(Styles.COLOR_ERROR);
+                labelQueriesStatus.setText("Path does not identity an existing file.");
+                break;
+            case NOT_PROVIDED:
+                labelQueriesStatus.setForeground(Styles.COLOR_ERROR);
+                labelQueriesStatus.setText("Please provide a valid UPPAAL queries file (*.q) path.");
+                break;
+            case NOT_VALID:
+                labelQueriesStatus.setForeground(Styles.COLOR_ERROR);
+                labelQueriesStatus.setText("Path does not identity a valid UPPAAL queries file.");
+                break;
+            case OK:
+                labelQueriesStatus.setForeground(Styles.COLOR_FOREGROUND_PRIMARY);
+                labelQueriesStatus.setText(queriesName + " ");
+                break;
+        }
+    }
+
+    @Override
+    public void setReport(final String report) {
+        textAreaReport.setEnabled(true);
+        textAreaReport.setText(report);
     }
 }

@@ -33,7 +33,7 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
 
                 UserData.setUppaalSystemPath(pathString);
                 view.setSystemPath(pathString);
-                view.setSystemStatus(ViewVerifySystem.SystemStatus.OK, Paths.get(pathString).getFileName().toString());
+                view.setSystemStatus(ViewVerifySystem.Status.OK, Paths.get(pathString).getFileName().toString());
 
             } catch (final UppaalProxyException e) {
                 switch (e.status()) {
@@ -41,13 +41,13 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                         view.showException("Failed to connect to UPPAAL engine.", e.getCause());
                         break;
                     case SYSTEM_NOT_FOUND:
-                        view.setSystemStatus(ViewVerifySystem.SystemStatus.NOT_FOUND, null);
+                        view.setSystemStatus(ViewVerifySystem.Status.NOT_FOUND, null);
                         break;
                     case SYSTEM_NOT_VALID:
-                        view.setSystemStatus(ViewVerifySystem.SystemStatus.NOT_VALID, null);
+                        view.setSystemStatus(ViewVerifySystem.Status.NOT_VALID, null);
                         break;
                     case SYSTEM_NOT_PROVIDED:
-                        view.setSystemStatus(ViewVerifySystem.SystemStatus.NOT_PROVIDED, null);
+                        view.setSystemStatus(ViewVerifySystem.Status.NOT_PROVIDED, null);
                         break;
                     default:
                         view.showException(null, e);
@@ -60,7 +60,7 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
         if (lastSystemPathString != null && lastSystemPathString.length() > 0) {
             setSystemPath.accept(lastSystemPathString);
         }
-        view.onUppaalSystemPath().subscribe(setSystemPath);
+        view.onSystemPath().subscribe(setSystemPath);
     }
 
     @Override

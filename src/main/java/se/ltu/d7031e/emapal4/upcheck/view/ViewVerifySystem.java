@@ -7,24 +7,51 @@ import se.ltu.d7031e.emapal4.upcheck.util.EventPublisher;
  */
 public interface ViewVerifySystem extends View {
     /**
-     * @return UPPAAL system selection event publisher.
+     * @return UPPAAL system selection event publisher
      */
-    EventPublisher<String> onUppaalSystemPath();
+    EventPublisher<String> onSystemPath();
 
     /**
-     * @param pathString Path to new currently selected UPPAAL system.
+     * @return UPPAAL queries file selection event publisher
+     */
+    EventPublisher<String> onQueriesPath();
+
+    /**
+     * @return UPPAAL queries file save event publisher
+     */
+    EventPublisher<String> onQueriesSave();
+
+    /**
+     * @param pathString path to new currently selected UPPAAL system
      */
     void setSystemPath(final String pathString);
 
     /**
-     * @param status Indication of validity of currently selected UPPAAL system.
+     * @param status     indication of validity of currently selected UPPAAL system
+     * @param systemName name of system related to status
      */
-    void setSystemStatus(final SystemStatus status, final String systemName);
+    void setSystemStatus(final Status status, final String systemName);
+
+    /**
+     * @param pathString path to new currently selected UPPAAL queries file
+     */
+    void setQueriesPath(final String pathString);
+
+    /**
+     * @param status      indication of validity of currently selected UPPAAL queries file
+     * @param queriesName name of queries file related to status
+     */
+    void setQueriesStatus(final Status status, final String queriesName);
+
+    /**
+     * @param report report to present
+     */
+    void setReport(final String report);
 
     /**
      * Indicates validity status of some selected UPPAAL system.
      */
-    enum SystemStatus {
+    enum Status {
         NOT_FOUND,
         NOT_PROVIDED,
         NOT_VALID,
