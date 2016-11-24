@@ -23,6 +23,7 @@ class Styles {
     static final Font FONT_HEADING1 = new Font("Sans", Font.PLAIN, 32);
     static final Font FONT_PARAGRAPH = new Font("Sans", Font.PLAIN, 16);
     static final Font FONT_SMALL = new Font("Sans", Font.PLAIN, 11);
+    static final Font FONT_SMALL_BOLD = new Font("Sans", Font.BOLD, 11);
 
     static final int SPACING_SMALLER = 6;
     static final int SPACING_SMALL = 10;

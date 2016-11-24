@@ -19,7 +19,7 @@ public interface ViewVerifySystem extends View {
     /**
      * @param status Indication of validity of currently selected UPPAAL system.
      */
-    void setSystemStatus(final SystemStatus status);
+    void setSystemStatus(final SystemStatus status, final String systemName);
 
     /**
      * Indicates validity status of some selected UPPAAL system.

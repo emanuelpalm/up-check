@@ -28,68 +28,163 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
         addChoosableFileFilter(fileFilter);
         setFileFilter(fileFilter);
     }};
-    private final JTextField fieldPath;
-    private final JLabel labelStatus;
-    private final JPanel root;
 
+    private final JPanel root;
     private final EventBroker<String> onUppaalSystemPath = new EventBroker<>();
 
+    private JLabel labelSystemStatus;
+    private JLabel labelQueriesStatus;
+    private JLabel labelReportStatus;
+    private JTextArea textAreaQueries;
+    private JTextArea textAreaReport;
+
     public WindowViewVerifySystem() {
-        fieldPath = new JTextField() {{
-            setBorder(Styles.BORDER_EMPTY_FIELD_SMALL);
-            setFont(Styles.FONT_SMALL);
-        }};
-
-        labelStatus = new JLabel() {{
-            setBorder(Styles.BORDER_EMPTY_MEDIUM);
-            setFont(Styles.FONT_SMALL);
-            setForeground(Styles.COLOR_ERROR);
-            setMinimumSize(new Dimension(100, 80));
-        }};
-
         root = new JPanel(new BorderLayout()) {{
             setBackground(Styles.COLOR_BACKGROUND_PRIMARY);
 
             final JPanel root = this;
 
             add(new JPanel() {{
-                setBackground(Styles.COLOR_BACKGROUND_SECONDARY);
                 setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-                add(new JLabel("Verify UPPAAL System Integrity") {{
-                    setAlignmentX(Component.LEFT_ALIGNMENT);
-                    setBorder(Styles.BORDER_EMPTY_MEDIUM);
-                    setFont(Styles.FONT_PARAGRAPH);
-                    setForeground(Styles.COLOR_FOREGROUND_SECONDARY);
-                }});
-                add(new JPanel(new GridLayout(0, 1)) {{
-                    setAlignmentX(Component.LEFT_ALIGNMENT);
-                    setBackground(Styles.COLOR_BACKGROUND_PRIMARY);
-                    add(new JPanel() {{
+                add(new JPanel() {{
+                    setBackground(Styles.COLOR_BACKGROUND_SECONDARY);
+                    setBorder(Styles.BORDER_EMPTY_SMALL);
+                    setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+                    add(new JLabel("UPPAAL System") {{
+                        setAlignmentX(Component.LEFT_ALIGNMENT);
+                        setFont(Styles.FONT_SMALL);
+                        setForeground(Styles.COLOR_FOREGROUND_SECONDARY);
+                    }});
+                    add(Box.createHorizontalGlue());
+                    add(new JButton("Select ...") {{
                         setBorder(Styles.BORDER_EMPTY_FIELD_SMALL);
+                        setFocusPainted(false);
+                        setFont(Styles.FONT_SMALL);
+                        addActionListener(evt -> {
+                            if (fileChooserUppaalSystem.showDialog(root, "Select System") == JFileChooser.APPROVE_OPTION) {
+                                final String selectedPath = fileChooserUppaalSystem.getSelectedFile().getAbsolutePath();
+                                SwingUtilities.invokeLater(() -> onUppaalSystemPath.publish(selectedPath));
+                            }
+                            fileChooserUppaalSystem.setSelectedFile(null);
+                        });
+                    }});
+                }});
+                add(new JPanel() {{
+                    setBorder(Styles.BORDER_EMPTY_SMALL);
+                    setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+                    setOpaque(false);
+                    add(labelSystemStatus = new JLabel() {{
+                        setFont(Styles.FONT_SMALL_BOLD);
+                        setText(" ");
+                    }});
+                    add(Box.createHorizontalGlue());
+                }});
+            }}, BorderLayout.NORTH);
+            add(new JPanel(new GridLayout(0, 1)) {{
+                add(new JPanel() {{
+                    setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+                    add(new JPanel() {{
+                        setBackground(Styles.COLOR_BACKGROUND_SECONDARY);
+                        setBorder(Styles.BORDER_EMPTY_SMALL);
                         setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-                        add(new JLabel("UPPAAL System") {{
+                        setMaximumSize(new Dimension(Integer.MAX_VALUE, (int) getPreferredSize().getHeight()));
+                        add(new JLabel("System Queries") {{
+                            setAlignmentX(Component.LEFT_ALIGNMENT);
                             setFont(Styles.FONT_SMALL);
+                            setForeground(Styles.COLOR_FOREGROUND_SECONDARY);
                         }});
-                        add(Box.createRigidArea(new Dimension(Styles.SPACING_SMALL, 0)));
                         add(Box.createHorizontalGlue());
-                        add(fieldPath);
-                        add(Box.createRigidArea(new Dimension(Styles.SPACING_SMALL, 0)));
-                        add(new JButton("Open ...") {{
+                        add(Box.createHorizontalStrut(Styles.SPACING_SMALL));
+                        add(new JButton("Load ...") {{
                             setBorder(Styles.BORDER_EMPTY_FIELD_SMALL);
+                            setEnabled(false);
                             setFocusPainted(false);
                             setFont(Styles.FONT_SMALL);
-                            addActionListener(evt -> {
-                                if (fileChooserUppaalSystem.showDialog(root, "Open System") == JFileChooser.APPROVE_OPTION) {
-                                    fieldPath.setText(fileChooserUppaalSystem.getSelectedFile().getAbsolutePath());
-                                    SwingUtilities.invokeLater(() -> onUppaalSystemPath.publish(fieldPath.getText()));
-                                }
-                                fileChooserUppaalSystem.setSelectedFile(null);
-                            });
+                        }});
+                        add(Box.createHorizontalStrut(Styles.SPACING_SMALL));
+                        add(new JButton("Save") {{
+                            setBorder(Styles.BORDER_EMPTY_FIELD_SMALL);
+                            setEnabled(false);
+                            setFocusPainted(false);
+                            setFont(Styles.FONT_SMALL);
+                        }});
+                        add(Box.createHorizontalStrut(Styles.SPACING_SMALL));
+                        add(new JButton("Save as ...") {{
+                            setBorder(Styles.BORDER_EMPTY_FIELD_SMALL);
+                            setEnabled(false);
+                            setFocusPainted(false);
+                            setFont(Styles.FONT_SMALL);
                         }});
                     }});
-                    add(labelStatus);
+                    add(new JPanel() {{
+                        setBorder(Styles.BORDER_EMPTY_SMALL);
+                        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+                        setOpaque(false);
+                        add(labelQueriesStatus = new JLabel() {{
+                            setFont(Styles.FONT_SMALL_BOLD);
+                            setText(" ");
+                        }});
+                        add(Box.createHorizontalGlue());
+                    }});
+                    add(new JPanel() {{
+                        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+                        add(new JScrollPane(textAreaQueries = new JTextArea() {{
+                            setBorder(Styles.BORDER_EMPTY_SMALL);
+                            setEnabled(false);
+                            setEditable(false);
+                            setLineWrap(true);
+                            setFont(Styles.FONT_SMALL);
+                            setRows(8);
+                        }}, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER) {{
+                            setAlignmentX(Component.LEFT_ALIGNMENT);
+                        }});
+                    }});
                 }});
-            }}, BorderLayout.PAGE_START);
+                add(new JPanel() {{
+                    setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+                    add(new JPanel() {{
+                        setBackground(Styles.COLOR_BACKGROUND_SECONDARY);
+                        setBorder(Styles.BORDER_EMPTY_SMALL);
+                        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+                        setMaximumSize(new Dimension(Integer.MAX_VALUE, (int) getPreferredSize().getHeight()));
+                        add(new JLabel("System Report") {{
+                            setAlignmentX(Component.LEFT_ALIGNMENT);
+                            setFont(Styles.FONT_SMALL);
+                            setForeground(Styles.COLOR_FOREGROUND_SECONDARY);
+                        }});
+                        add(Box.createHorizontalGlue());
+                        add(new JButton("Generate") {{
+                            setBorder(Styles.BORDER_EMPTY_FIELD_SMALL);
+                            setEnabled(false);
+                            setFocusPainted(false);
+                            setFont(Styles.FONT_SMALL);
+                        }});
+                    }});
+                    add(new JPanel() {{
+                        setBorder(Styles.BORDER_EMPTY_SMALL);
+                        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+                        setOpaque(false);
+                        add(labelReportStatus = new JLabel() {{
+                            setFont(Styles.FONT_SMALL_BOLD);
+                            setText(" ");
+                        }});
+                        add(Box.createHorizontalGlue());
+                    }});
+                    add(new JPanel() {{
+                        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+                        add(new JScrollPane(textAreaReport = new JTextArea() {{
+                            setBorder(Styles.BORDER_EMPTY_SMALL);
+                            setEditable(false);
+                            setEnabled(false);
+                            setLineWrap(true);
+                            setFont(Styles.FONT_SMALL);
+                            setRows(8);
+                        }}, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER) {{
+                            setAlignmentX(Component.LEFT_ALIGNMENT);
+                        }});
+                    }});
+                }});
+            }}, BorderLayout.CENTER);
         }};
     }
 
@@ -110,29 +205,29 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
 
     @Override
     public void setSystemPath(final String pathString) {
-        if (pathString == null) {
-            fieldPath.setText("");
-        } else {
-            final File file = new File(pathString);
-            fieldPath.setText(file.getAbsolutePath());
-            fileChooserUppaalSystem.setSelectedFile(file);
+        if (pathString != null) {
+            fileChooserUppaalSystem.setSelectedFile(new File(pathString));
         }
     }
 
     @Override
-    public void setSystemStatus(final SystemStatus status) {
+    public void setSystemStatus(final SystemStatus status, final String systemName) {
         switch (status) {
             case NOT_FOUND:
-                labelStatus.setText("Path does not identity an existing file.");
+                labelSystemStatus.setForeground(Styles.COLOR_ERROR);
+                labelSystemStatus.setText("Path does not identity an existing file.");
                 break;
             case NOT_PROVIDED:
-                labelStatus.setText("Please provide a valid UPPAAL system path.");
+                labelSystemStatus.setForeground(Styles.COLOR_ERROR);
+                labelSystemStatus.setText("Please provide a valid UPPAAL system path.");
                 break;
             case NOT_VALID:
-                labelStatus.setText("Path does not identity a valid UPPAAL system.");
+                labelSystemStatus.setForeground(Styles.COLOR_ERROR);
+                labelSystemStatus.setText("Path does not identity a valid UPPAAL system.");
                 break;
             case OK:
-                labelStatus.setText("");
+                labelSystemStatus.setForeground(Styles.COLOR_FOREGROUND_PRIMARY);
+                labelSystemStatus.setText(systemName + " ");
                 break;
         }
     }
