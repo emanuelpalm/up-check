@@ -148,11 +148,11 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                         setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
                         add(new JScrollPane(textAreaQueries = new JTextArea() {{
                             setBorder(Styles.BORDER_EMPTY_SMALL);
+                            setColumns(78);
                             setEnabled(false);
-                            setLineWrap(true);
                             setFont(Styles.FONT_MONOSPACED);
                             setRows(8);
-                        }}, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER) {{
+                        }}, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED) {{
                             setAlignmentX(Component.LEFT_ALIGNMENT);
                         }});
                     }});
@@ -178,12 +178,12 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                         setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
                         add(new JScrollPane(textAreaReport = new JTextArea() {{
                             setBorder(Styles.BORDER_EMPTY_SMALL);
+                            setColumns(78);
                             setEditable(false);
                             setEnabled(false);
-                            setLineWrap(true);
                             setFont(Styles.FONT_MONOSPACED);
                             setRows(8);
-                        }}, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER) {{
+                        }}, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED) {{
                             setAlignmentX(Component.LEFT_ALIGNMENT);
                         }});
                     }});
