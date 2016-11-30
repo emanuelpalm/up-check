@@ -64,19 +64,34 @@ public interface ViewVerifySystem extends View {
         OK,
     }
 
+    /**
+     * Represents a set of UPPAAL queries.
+     */
     class Queries {
         private final String pathString;
         private final String data;
 
+        /**
+         * Creates new UPPAAL queries
+         *
+         * @param pathString path to file containing queries
+         * @param data query data string
+         */
         Queries(final String pathString, final String data) {
             this.pathString = pathString;
             this.data = data;
         }
 
+        /**
+         * @return path to file containing UPPAAL queries
+         */
         public String pathString() {
             return pathString;
         }
 
+        /**
+         * @return string containing UPPAAL queries
+         */
         public String data() {
             return data;
         }
