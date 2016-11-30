@@ -9,6 +9,7 @@ import se.ltu.d7031e.emapal4.upcheck.view.ViewVerifySystem;
 
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicReference;
@@ -30,6 +31,8 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
     @Override
     public void register(final Navigator navigator, final ViewVerifySystem view) {
         final AtomicReference<UppaalSystem> atomicUppaalSystem = new AtomicReference<>();
+        final AtomicReference<UppaalQueries> atomicUppaalQueries = new AtomicReference<>();
+
         final Consumer<String> setSystemPath = pathString -> {
             final String name = Paths.get(pathString).getFileName().toString();
             try {
@@ -38,11 +41,6 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                 UserData.setUppaalSystemPath(pathString);
                 view.setSystemPath(pathString);
                 view.setSystemStatus(ViewVerifySystem.Status.OK, name);
-
-                UserData.setUppaalQueriesPath(null);
-                view.setQueries(null);
-                view.setQueriesPath(null);
-                view.setQueriesStatus(ViewVerifySystem.Status.OK, null);
 
             } catch (final UppaalProxyException e) {
                 switch (e.status()) {
@@ -66,15 +64,14 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
 
             } catch (final Throwable e) {
                 view.showException(null, e);
+
+            } finally {
+                UserData.setUppaalQueriesPath(null);
+                view.setQueries(null);
+                view.setQueriesPath(null);
+                view.setQueriesStatus(ViewVerifySystem.Status.OK, null);
             }
         };
-        final String lastSystemPathString = UserData.uppaalSystemPath();
-        if (lastSystemPathString != null && lastSystemPathString.length() > 0) {
-            setSystemPath.accept(lastSystemPathString);
-        }
-        view.onSystemPath().subscribe(setSystemPath);
-
-        final AtomicReference<UppaalQueries> atomicUppaalQueries = new AtomicReference<>();
         final Consumer<String> setQueriesPath = pathString -> {
             if (pathString == null || pathString.length() == 0) {
                 view.setQueriesStatus(ViewVerifySystem.Status.NOT_PROVIDED, null);
@@ -98,11 +95,33 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                 view.showException(null, e);
             }
         };
-        final String lastQueriesPathString = UserData.uppaalQueriesPath();
-        if (lastQueriesPathString != null && lastQueriesPathString.length() > 0) {
-            setQueriesPath.accept(lastQueriesPathString);
-        }
+        final Consumer<ViewVerifySystem.Queries> saveQueries = queries -> {
+            try {
+                Files.write(
+                        Paths.get(queries.pathString()),
+                        queries.data().getBytes(StandardCharsets.UTF_8));
+
+            } catch (final Throwable e) {
+                view.showException(null, e);
+            }
+        };
+
+        view.onSystemPath().subscribe(setSystemPath);
         view.onQueriesPath().subscribe(setQueriesPath);
+        view.onQueriesSave().subscribe(saveQueries);
+
+        // Initialize.
+        {
+            final String lastSystemPathString = UserData.uppaalSystemPath();
+            final String lastQueriesPathString = UserData.uppaalQueriesPath();
+
+            if (lastSystemPathString != null && lastSystemPathString.length() > 0) {
+                setSystemPath.accept(lastSystemPathString);
+            }
+            if (lastQueriesPathString != null && lastQueriesPathString.length() > 0) {
+                setQueriesPath.accept(lastQueriesPathString);
+            }
+        }
     }
 
     @Override

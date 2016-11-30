@@ -19,7 +19,7 @@ public interface ViewVerifySystem extends View {
     /**
      * @return UPPAAL queries file save event publisher
      */
-    EventPublisher<String> onQueriesSave();
+    EventPublisher<Queries> onQueriesSave();
 
     /**
      * @param pathString path to new currently selected UPPAAL system
@@ -62,5 +62,23 @@ public interface ViewVerifySystem extends View {
         NOT_PROVIDED,
         NOT_VALID,
         OK,
+    }
+
+    class Queries {
+        private final String pathString;
+        private final String data;
+
+        Queries(final String pathString, final String data) {
+            this.pathString = pathString;
+            this.data = data;
+        }
+
+        public String pathString() {
+            return pathString;
+        }
+
+        public String data() {
+            return data;
+        }
     }
 }

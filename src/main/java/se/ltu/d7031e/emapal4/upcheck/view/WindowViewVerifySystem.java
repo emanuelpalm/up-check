@@ -47,7 +47,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     private final JPanel root;
     private final EventBroker<String> onSystemPath = new EventBroker<>();
     private final EventBroker<String> onQueriesPath = new EventBroker<>();
-    private final EventBroker<String> onQueriesSave = new EventBroker<>();
+    private final EventBroker<ViewVerifySystem.Queries> onQueriesSave = new EventBroker<>();
 
     private JLabel labelSystemStatus;
 
@@ -141,7 +141,9 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                         add(buttonQueriesSave = new JButton("Save") {{
                             setEnabled(false);
                             setFocusPainted(false);
-                            addActionListener(evt -> onQueriesPath.publish(fileChooserQueries.getSelectedFile().getAbsolutePath()));
+                            addActionListener(evt -> onQueriesSave.publish(new ViewVerifySystem.Queries(
+                                    fileChooserQueries.getSelectedFile().getAbsolutePath(),
+                                    textAreaQueries.getText())));
                         }});
                         add(Box.createHorizontalStrut(Styles.SPACING_SMALL));
                         add(buttonQueriesSaveAs = new JButton("Save as ...") {{
@@ -150,7 +152,9 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                             addActionListener(evt -> {
                                 if (fileChooserQueries.showDialog(root, "Save Queries") == JFileChooser.APPROVE_OPTION) {
                                     final String selectedPath = fileChooserQueries.getSelectedFile().getAbsolutePath();
-                                    SwingUtilities.invokeLater(() -> onQueriesSave.publish(selectedPath));
+                                    SwingUtilities.invokeLater(() -> onQueriesSave.publish(new ViewVerifySystem.Queries(
+                                            selectedPath,
+                                            textAreaQueries.getText())));
                                 }
                             });
                         }});
@@ -231,7 +235,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     }
 
     @Override
-    public EventPublisher<String> onQueriesSave() {
+    public EventPublisher<ViewVerifySystem.Queries> onQueriesSave() {
         return onQueriesSave;
     }
 
