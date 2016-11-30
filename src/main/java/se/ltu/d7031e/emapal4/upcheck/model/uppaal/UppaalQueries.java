@@ -9,13 +9,17 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
  * Holds a collection of UPPAAL queries that may be asked against some {@link UppaalSystem} using a {@link UppaalProxy}.
  */
 public class UppaalQueries {
+    private static final Predicate<String> IS_COMMENT_LINE = Pattern.compile("\\s*//.*").asPredicate();
     private static final Charset CHARSET = StandardCharsets.UTF_8;
 
     private final String original;
@@ -58,11 +62,30 @@ public class UppaalQueries {
 
     private static Set<UppaalQuery> parseBytes(final byte[] bytes, final Charset cs) {
         final AtomicInteger lineCounter = new AtomicInteger(0);
+        final AtomicBoolean inComment = new AtomicBoolean(false);
 
         final ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
         return new BufferedReader(new InputStreamReader(inputStream, cs))
                 .lines()
-                .map(line -> new UppaalQuery(lineCounter.incrementAndGet(), line))
+                .map(line -> {
+                    if (inComment.get()) {
+                        final int indexEnd = line.lastIndexOf("*/");
+                        if (indexEnd >= 0) {
+                            line = line.substring(indexEnd + 2);
+                            inComment.set(false);
+                        }
+                    } else {
+                        final int indexBegin = line.indexOf("/*");
+                        if (indexBegin >= 0) {
+                            line = line.substring(0, indexBegin);
+                            inComment.set(true);
+                        }
+                    }
+                    if (IS_COMMENT_LINE.test(line)) {
+                        line = "";
+                    }
+                    return new UppaalQuery(lineCounter.incrementAndGet(), line);
+                })
                 .filter(UppaalQuery::isNotEmpty)
                 .collect(Collectors.toSet());
     }
