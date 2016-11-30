@@ -52,6 +52,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     private JLabel labelSystemStatus;
 
     private JButton buttonQueriesLoad;
+    private JButton buttonQueriesReload;
     private JButton buttonQueriesSave;
     private JButton buttonQueriesSaveAs;
     private JLabel labelQueriesStatus;
@@ -108,6 +109,23 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                             setForeground(Styles.COLOR_FOREGROUND_SECONDARY);
                         }});
                         add(Box.createHorizontalGlue());
+                        add(Box.createHorizontalStrut(Styles.SPACING_SMALL));
+
+                        add(buttonQueriesReload = new JButton("Reload") {{
+                            setEnabled(false);
+                            setFocusPainted(false);
+                            addActionListener(evt -> {
+                                final int option = JOptionPane.showConfirmDialog(
+                                        root,
+                                        "Note that this will override any unsaved changes.",
+                                        "Confirm Reload",
+                                        JOptionPane.OK_CANCEL_OPTION,
+                                        JOptionPane.WARNING_MESSAGE);
+                                if (option == JOptionPane.OK_OPTION) {
+                                    onQueriesPath.publish(fileChooserQueries.getSelectedFile().getAbsolutePath());
+                                }
+                            });
+                        }});
                         add(Box.createHorizontalStrut(Styles.SPACING_SMALL));
                         add(buttonQueriesLoad = new JButton("Load ...") {{
                             setEnabled(false);
