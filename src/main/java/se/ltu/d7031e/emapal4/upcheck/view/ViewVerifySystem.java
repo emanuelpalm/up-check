@@ -27,6 +27,11 @@ public interface ViewVerifySystem extends View {
     void setSystemPath(final String pathString);
 
     /**
+     * @param queries string containing UPPAAL queries
+     */
+    void setQueries(final String queries);
+
+    /**
      * @param status     indication of validity of currently selected UPPAAL system
      * @param systemName name of system related to status
      */

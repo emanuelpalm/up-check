@@ -78,11 +78,13 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
             final Path path = Paths.get(pathString);
             final String name = path.getFileName().toString();
             try {
-                atomicUppaalQueries.set(UppaalQueries.readFile(path, StandardCharsets.UTF_8));
+                final UppaalQueries queries = UppaalQueries.readFile(path, StandardCharsets.UTF_8);
+                atomicUppaalQueries.set(queries);
 
                 UserData.setUppaalQueriesPath(pathString);
                 view.setQueriesPath(pathString);
                 view.setQueriesStatus(ViewVerifySystem.Status.OK, name);
+                view.setQueries(queries.toString());
 
             } catch (final UncheckedIOException e) {
                 view.setQueriesStatus(ViewVerifySystem.Status.NOT_LOADED, name);

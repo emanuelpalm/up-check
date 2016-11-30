@@ -227,6 +227,11 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     }
 
     @Override
+    public void setQueries(final String queries) {
+        textAreaQueries.setText(queries);
+    }
+
+    @Override
     public void setSystemStatus(final Status status, final String systemName) {
         if (status == Status.OK) {
             setSystemStatusOK(systemName);
