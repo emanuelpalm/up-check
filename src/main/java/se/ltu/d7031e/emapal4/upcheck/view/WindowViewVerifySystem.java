@@ -48,6 +48,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     private final EventBroker<String> onSystemPath = new EventBroker<>();
     private final EventBroker<String> onQueriesPath = new EventBroker<>();
     private final EventBroker<ViewVerifySystem.Queries> onQueriesSave = new EventBroker<>();
+    private final EventBroker<ViewVerifySystem.Queries> onReportRequest = new EventBroker<>();
 
     private JLabel labelSystemStatus;
 
@@ -58,6 +59,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     private JLabel labelQueriesStatus;
     private JTextArea textAreaQueries;
 
+    private JButton buttonReportClear;
     private JButton buttonReportGenerate;
     private JTextArea textAreaReport;
 
@@ -194,6 +196,25 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                         add(buttonReportGenerate = new JButton("Generate") {{
                             setEnabled(false);
                             setFocusPainted(false);
+                            addActionListener(evt -> onReportRequest.publish(new ViewVerifySystem.Queries(
+                                    null,
+                                    textAreaQueries.getText())));
+                        }});
+                        add(Box.createHorizontalStrut(Styles.SPACING_SMALL));
+                        add(buttonReportClear = new JButton("Clear") {{
+                            setEnabled(false);
+                            setFocusPainted(false);
+                            addActionListener(evt -> {
+                                final int option = JOptionPane.showConfirmDialog(
+                                        root,
+                                        "Note that this will remove the current system report.",
+                                        "Confirm report clearing",
+                                        JOptionPane.OK_CANCEL_OPTION,
+                                        JOptionPane.WARNING_MESSAGE);
+                                if (option == JOptionPane.OK_OPTION) {
+                                    textAreaReport.setText("");
+                                }
+                            });
                         }});
                     }});
                     add(new JPanel() {{
@@ -237,6 +258,11 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     @Override
     public EventPublisher<ViewVerifySystem.Queries> onQueriesSave() {
         return onQueriesSave;
+    }
+
+    @Override
+    public EventPublisher<ViewVerifySystem.Queries> onReportRequest() {
+        return onReportRequest;
     }
 
     @Override
@@ -284,6 +310,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
         buttonQueriesSaveAs.setEnabled(false);
         textAreaQueries.setEnabled(false);
         buttonReportGenerate.setEnabled(false);
+        buttonReportClear.setEnabled(false);
     }
 
     private void setSystemStatusOK(final String systemName) {
@@ -293,6 +320,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
         buttonQueriesSaveAs.setEnabled(true);
         textAreaQueries.setEnabled(true);
         buttonReportGenerate.setEnabled(true);
+        buttonReportClear.setEnabled(true);
     }
 
     @Override
@@ -340,8 +368,8 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     }
 
     @Override
-    public void setReport(final String report) {
+    public void addReport(final String report) {
         textAreaReport.setEnabled(true);
-        textAreaReport.setText(report);
+        textAreaReport.append(report + "\r\n\r\n");
     }
 }

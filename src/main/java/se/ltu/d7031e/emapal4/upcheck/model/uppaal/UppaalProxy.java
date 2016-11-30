@@ -2,6 +2,7 @@ package se.ltu.d7031e.emapal4.upcheck.model.uppaal;
 
 import se.ltu.d7031e.emapal4.upcheck.util.DynamicException;
 import se.ltu.d7031e.emapal4.upcheck.util.DynamicFactory;
+import se.ltu.d7031e.emapal4.upcheck.util.DynamicInterface;
 import se.ltu.d7031e.emapal4.upcheck.util.DynamicObject;
 
 import java.net.MalformedURLException;
@@ -73,5 +74,25 @@ public class UppaalProxy {
         } catch (final MalformedURLException e) {
             throw new UppaalProxyException(UppaalProxyStatus.SYSTEM_NOT_FOUND, e);
         }
+    }
+
+    /**
+     * Analyzes given UPPAAL system using provided query.
+     *
+     * @param system UPPAAL system to analyze
+     * @param query  target query
+     * @return query result
+     */
+    public UppaalQueryResult query(final UppaalSystem system, final String query) {
+        final DynamicInterface queryFeedback = dynamicFactory.newInterfaceInstance("com.uppaal.engine.QueryFeedback");
+        final UppaalQueryResult queryResult = new UppaalQueryResult(queryFeedback);
+        final Object unwrappedSystem = system.dynamicObject().unwrap();
+
+        // TODO: Do something more useful with result.
+        final char result = (char)engine
+                .method("query", unwrappedSystem.getClass(), String.class, String.class, dynamicFactory.loadClass("com.uppaal.engine.QueryFeedback"))
+                .invoke(unwrappedSystem, "trace 1", query, queryFeedback.unwrap());
+
+        return queryResult;
     }
 }

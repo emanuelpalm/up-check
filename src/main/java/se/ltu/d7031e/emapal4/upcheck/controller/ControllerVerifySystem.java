@@ -1,9 +1,6 @@
 package se.ltu.d7031e.emapal4.upcheck.controller;
 
-import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalProxy;
-import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalProxyException;
-import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalQueries;
-import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalSystem;
+import se.ltu.d7031e.emapal4.upcheck.model.uppaal.*;
 import se.ltu.d7031e.emapal4.upcheck.model.user.UserData;
 import se.ltu.d7031e.emapal4.upcheck.view.ViewVerifySystem;
 
@@ -31,7 +28,7 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
     @Override
     public void register(final Navigator navigator, final ViewVerifySystem view) {
         final AtomicReference<UppaalSystem> atomicUppaalSystem = new AtomicReference<>();
-        final AtomicReference<UppaalQueries> atomicUppaalQueries = new AtomicReference<>();
+        final UppaalQueries uppaalQueries = UppaalQueries.readString("");
 
         final Consumer<String> setSystemPath = pathString -> {
             final String name = Paths.get(pathString).getFileName().toString();
@@ -81,7 +78,6 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
             final String name = path.getFileName().toString();
             try {
                 final UppaalQueries queries = UppaalQueries.readFile(path, StandardCharsets.UTF_8);
-                atomicUppaalQueries.set(queries);
 
                 UserData.setUppaalQueriesPath(pathString);
                 view.setQueries(queries.toString());
@@ -105,10 +101,23 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                 view.showException(null, e);
             }
         };
+        final Consumer<ViewVerifySystem.Queries> generateReport = queries -> uppaalQueries.update(queries.data());
+        final Consumer<UppaalQuery> handleQuery = query -> {
+            view.addReport("#> Query on line " + query.lineNumber() + " updated: " + query.data());
+            final UppaalSystem uppaalSystem = atomicUppaalSystem.get();
+            if (uppaalSystem == null) {
+                view.addReport("!> No available UPPAAL system. Nothing to report.");
+                return;
+            }
+            final UppaalQueryResult uppaalQueryResult = uppaalProxy.query(uppaalSystem, query.data());
+            view.addReport(uppaalQueryResult.toString());
+        };
 
         view.onSystemPath().subscribe(setSystemPath);
         view.onQueriesPath().subscribe(setQueriesPath);
         view.onQueriesSave().subscribe(saveQueries);
+        view.onReportRequest().subscribe(generateReport);
+        uppaalQueries.onQueryUpdated().subscribe(handleQuery);
 
         // Initialize.
         {

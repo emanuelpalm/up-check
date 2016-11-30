@@ -41,6 +41,21 @@ public class DynamicFactory {
     }
 
     /**
+     * Loads {@link Class} by name.
+     *
+     * @param className name of class
+     * @return class object
+     */
+    public Class<?> loadClass(final String className) {
+        try {
+            return classLoader.loadClass(className);
+
+        } catch (final ClassNotFoundException e) {
+            throw new DynamicException(e);
+        }
+    }
+
+    /**
      * Creates new instance of class identified by class name.
      *
      * @param className class to create instance of

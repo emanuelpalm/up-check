@@ -27,10 +27,12 @@ public class DynamicInterface {
             object = Proxy.newProxyInstance(classLoader, new Class<?>[]{classLoader.loadClass(className)}, (proxy, method, args) -> {
                 final String methodName = method.getName() + Arrays
                         .stream(method.getParameterTypes())
-                        .map(Object::toString)
+                        .map(Class::getName)
                         .collect(Collectors.joining(",", "(", ")"));
                 final Function<Object[], Object> proxyMethod = proxyMethods.getOrDefault(methodName, args0 -> {
-                    throw new DynamicException(new IllegalStateException("Unimplemented interface method invoked."));
+                    final String y = methodName;
+                    final DynamicInterface x = this;
+                    throw new DynamicException(new IllegalStateException("Unimplemented interface method invoked: " + method));
                 });
                 return proxyMethod.apply(args);
             });

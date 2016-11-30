@@ -22,6 +22,11 @@ public interface ViewVerifySystem extends View {
     EventPublisher<Queries> onQueriesSave();
 
     /**
+     * @return UPPAAL system report request event publisher
+     */
+    EventPublisher<Queries> onReportRequest();
+
+    /**
      * @param pathString path to new currently selected UPPAAL system
      */
     void setSystemPath(final String pathString);
@@ -51,7 +56,7 @@ public interface ViewVerifySystem extends View {
     /**
      * @param report report to present
      */
-    void setReport(final String report);
+    void addReport(final String report);
 
     /**
      * Indicates validity status of some selected UPPAAL system.

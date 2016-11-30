@@ -11,4 +11,11 @@ public class UppaalSystem {
     UppaalSystem(final DynamicObject uppaalSystem) {
         this.uppaalSystem = uppaalSystem;
     }
+
+    /**
+     * @return wrapped dynamic object
+     */
+    DynamicObject dynamicObject() {
+        return uppaalSystem;
+    }
 }

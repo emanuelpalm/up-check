@@ -1,7 +1,5 @@
 package se.ltu.d7031e.emapal4.upcheck.util;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 /**
  * Allows an object to be created differently depending on the runtime operating system family.
  */
@@ -43,7 +41,7 @@ public abstract class OsFactory<T> {
     /**
      * @return New general object instance.
      */
-    protected T createOnOther() { throw new NotImplementedException(); }
+    protected T createOnOther() { throw new IllegalStateException(); }
 
     enum Family {
         LINUX,
