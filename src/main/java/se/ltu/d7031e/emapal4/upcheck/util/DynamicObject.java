@@ -35,12 +35,12 @@ public class DynamicObject {
      * <p>
      * Note that this method cannot be used to invoke methods with primitive or generic type arguments.
      *
-     * @param methodName name of invoked method
+     * @param name name of invoked method
      * @param arguments  arbitrary arguments
      * @return wrapped value returned by invoked method, or {@code null}
      */
-    public DynamicObject invoke(final String methodName, final Object... arguments) {
-        final DynamicMethod method = method(methodName, Arrays.stream(arguments)
+    public DynamicObject invoke(final String name, final Object... arguments) {
+        final DynamicMethod method = method(name, Arrays.stream(arguments)
                 .map(Object::getClass)
                 .collect(Collectors.toList())
                 .toArray(new Class<?>[arguments.length]));
@@ -52,27 +52,21 @@ public class DynamicObject {
     }
 
     /**
-     * Gets named public non-static method with provided arguments.
+     * Gets named public non-static method with provided parameters.
      *
-     * @param name      name of requested method
-     * @param arguments arbitrary arguments
+     * @param name       name of requested method
+     * @param parameters arbitrary parameters
      * @return value returned by invoked method
      */
-    public DynamicMethod method(final String name, final Class<?>... arguments) {
-        final Method method = objectMethods.computeIfAbsent(resolveMethodName(name, arguments), ignored -> {
+    public DynamicMethod method(final String name, final Class<?>... parameters) {
+        final Method method = objectMethods.computeIfAbsent(DynamicMethod.resolveName(name, parameters), ignored -> {
             try {
-                return object.getClass().getMethod(name, arguments);
+                return object.getClass().getMethod(name, parameters);
 
             } catch (final Exception e) {
                 throw new DynamicException(e);
             }
         });
         return new DynamicMethod(object, method);
-    }
-
-    private static String resolveMethodName(final String simpleName, final Class<?>... arguments) {
-        return Arrays.stream(arguments)
-                .map(Class::getName)
-                .collect(Collectors.joining(",", simpleName + "(", ")"));
     }
 }

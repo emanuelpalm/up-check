@@ -11,6 +11,13 @@ public class DynamicFactory {
     private final ClassLoader classLoader;
 
     /**
+     * Creates new dynamic factory using the default system classloader.
+     */
+    public DynamicFactory() {
+        this(ClassLoader.getSystemClassLoader());
+    }
+
+    /**
      * @param classLoader class loader to wrap
      */
     public DynamicFactory(final ClassLoader classLoader) {
@@ -40,11 +47,11 @@ public class DynamicFactory {
      * @param arguments constructor arguments
      * @return class instance
      */
-    public DynamicObject create(final String className, final Object... arguments) {
-        return new DynamicObject(createRaw(className, arguments));
+    public DynamicObject newClassInstance(final String className, final Object... arguments) {
+        return new DynamicObject(newClassInstanceRaw(className, arguments));
     }
 
-    private Object createRaw(final String className, final Object[] arguments) {
+    private Object newClassInstanceRaw(final String className, final Object[] arguments) {
         try {
             final Class<?> clazz = classLoader.loadClass(className);
             if (arguments.length == 0) {
@@ -60,5 +67,15 @@ public class DynamicFactory {
         } catch (final Exception e) {
             throw new DynamicException(e);
         }
+    }
+
+    /**
+     * Creates new instance of interface identified by class name.
+     *
+     * @param className name of interface to create instance of
+     * @return interface instance
+     */
+    public DynamicInterface newInterfaceInstance(final String className) {
+        return new DynamicInterface(classLoader, className);
     }
 }

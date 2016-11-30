@@ -31,7 +31,7 @@ public class UppaalProxy {
                     uppaalFolder.uppaalJar().toUri().toURL(),
                     uppaalFolder.libModelJar().toUri().toURL()
             }));
-            this.engine = dynamicFactory.create("com.uppaal.engine.Engine");
+            this.engine = dynamicFactory.newClassInstance("com.uppaal.engine.Engine");
             this.engine.invoke("setServerPath", uppaalFolder.binServerExe().toString());
             this.engine.invoke("connect");
 
@@ -49,7 +49,7 @@ public class UppaalProxy {
      */
     public UppaalSystem loadSystemAt(final String pathString) throws UppaalProxyException {
         try {
-            final DynamicObject prototypeDocument = dynamicFactory.create("com.uppaal.model.core2.PrototypeDocument");
+            final DynamicObject prototypeDocument = dynamicFactory.newClassInstance("com.uppaal.model.core2.PrototypeDocument");
             final DynamicObject document = prototypeDocument.invoke("load", Paths.get(pathString).toUri().toURL());
 
             // UPPAAL version 4.0.x stores problems in a Vector, while version 4.1+ uses an ArrayList.
