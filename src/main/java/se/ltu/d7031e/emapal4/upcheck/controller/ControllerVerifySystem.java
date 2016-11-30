@@ -39,6 +39,11 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                 view.setSystemPath(pathString);
                 view.setSystemStatus(ViewVerifySystem.Status.OK, name);
 
+                UserData.setUppaalQueriesPath(null);
+                view.setQueries(null);
+                view.setQueriesPath(null);
+                view.setQueriesStatus(ViewVerifySystem.Status.OK, null);
+
             } catch (final UppaalProxyException e) {
                 switch (e.status()) {
                     case ENGINE_NOT_CONNECTED:
@@ -82,9 +87,9 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                 atomicUppaalQueries.set(queries);
 
                 UserData.setUppaalQueriesPath(pathString);
+                view.setQueries(queries.toString());
                 view.setQueriesPath(pathString);
                 view.setQueriesStatus(ViewVerifySystem.Status.OK, name);
-                view.setQueries(queries.toString());
 
             } catch (final UncheckedIOException e) {
                 view.setQueriesStatus(ViewVerifySystem.Status.NOT_LOADED, name);

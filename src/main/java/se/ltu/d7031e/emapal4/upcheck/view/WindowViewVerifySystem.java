@@ -266,7 +266,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
 
     private void setSystemStatusOK(final String systemName) {
         labelSystemStatus.setForeground(Styles.COLOR_FOREGROUND_PRIMARY);
-        labelSystemStatus.setText(systemName + " ");
+        labelSystemStatus.setText(systemName != null ? systemName + " " : " ");
         buttonQueriesLoad.setEnabled(true);
         buttonQueriesSaveAs.setEnabled(true);
         textAreaQueries.setEnabled(true);
@@ -280,6 +280,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
             fileChooserQueries.setSelectedFile(new File(pathString));
         }
         buttonQueriesSave.setEnabled(isSet);
+        buttonQueriesReload.setEnabled(isSet);
     }
 
     @Override
@@ -313,7 +314,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
 
     private void setQueriesStatusOK(final String queriesName) {
         labelQueriesStatus.setForeground(Styles.COLOR_FOREGROUND_PRIMARY);
-        labelQueriesStatus.setText(queriesName + " ");
+        labelQueriesStatus.setText(queriesName != null ? queriesName + " " : " ");
     }
 
     @Override
