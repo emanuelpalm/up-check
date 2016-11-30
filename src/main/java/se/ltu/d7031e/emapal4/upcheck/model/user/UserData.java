@@ -15,35 +15,51 @@ import java.util.Properties;
  * Keeps track of application user data.
  */
 public class UserData {
-    private static final String KEY_UPPAAL_SYSTEM_PATH = "UPPAAL_SYSTEM_PATH";
     private static final String KEY_UPPAAL_FOLDER_ROOT = "UPPAAL_FOLDER_ROOT";
+    private static final String KEY_UPPAAL_QUERIES_PATH = "UPPAAL_QUERIES_PATH";
+    private static final String KEY_UPPAAL_SYSTEM_PATH = "UPPAAL_SYSTEM_PATH";
+
 
     /**
-     * @return Path to last viewed UPPAAL system, if any.
-     */
-    public static String uppaalSystemPath() {
-        return UserProperties.get(KEY_UPPAAL_SYSTEM_PATH);
-    }
-
-    /**
-     * @return Path to local UPPAAL installation, if any known.
+     * @return path to local UPPAAL installation, if any known
      */
     public static String uppaalFolderRoot() {
         return UserProperties.get(KEY_UPPAAL_FOLDER_ROOT);
     }
 
     /**
-     * @param pathString New last viewed UPPAAL system path to set.
+     * @return path to last viewed UPPAAL queries file, if any
      */
-    public static void setUppaalSystemPath(final String pathString) {
-        UserProperties.set(KEY_UPPAAL_SYSTEM_PATH, pathString);
+    public static String uppaalQueriesPath() {
+        return UserProperties.get(KEY_UPPAAL_QUERIES_PATH);
     }
 
     /**
-     * @param pathString New UPPAAL path to set.
+     * @return path to last viewed UPPAAL system, if any
+     */
+    public static String uppaalSystemPath() {
+        return UserProperties.get(KEY_UPPAAL_SYSTEM_PATH);
+    }
+
+    /**
+     * @param pathString new UPPAAL path to set
      */
     public static void setUppaalFolderRoot(final String pathString) {
         UserProperties.set(KEY_UPPAAL_FOLDER_ROOT, pathString);
+    }
+
+    /**
+     * @param pathString new last viewed UPPAAL queries file path to set
+     */
+    public static void setUppaalQueriesPath(final String pathString) {
+        UserProperties.set(KEY_UPPAAL_QUERIES_PATH, pathString);
+    }
+
+    /**
+     * @param pathString new last viewed UPPAAL system path to set
+     */
+    public static void setUppaalSystemPath(final String pathString) {
+        UserProperties.set(KEY_UPPAAL_SYSTEM_PATH, pathString);
     }
 
     private static class UserProperties {

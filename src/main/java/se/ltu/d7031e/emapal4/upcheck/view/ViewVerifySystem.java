@@ -53,6 +53,7 @@ public interface ViewVerifySystem extends View {
      */
     enum Status {
         NOT_FOUND,
+        NOT_LOADED,
         NOT_PROVIDED,
         NOT_VALID,
         OK,

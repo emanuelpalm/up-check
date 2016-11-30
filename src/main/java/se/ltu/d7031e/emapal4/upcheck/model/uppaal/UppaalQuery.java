@@ -3,7 +3,7 @@ package se.ltu.d7031e.emapal4.upcheck.model.uppaal;
 import java.util.Objects;
 
 /**
- * Maintains data about a single query.
+ * Maintains data about a single UPPAAL system query.
  */
 public class UppaalQuery {
     private final int lineNumber;

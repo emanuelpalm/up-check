@@ -222,7 +222,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
         if (pathString != null) {
             final File file = new File(pathString);
             fileChooserSystem.setSelectedFile(file);
-            fileChooserQueries.setSelectedFile(file.getParentFile());
+            fileChooserQueries.setCurrentDirectory(file.getParentFile());
         }
     }
 
@@ -239,6 +239,9 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
         switch (status) {
             case NOT_FOUND:
                 labelSystemStatus.setText("Selected path does not identity an existing file.");
+                break;
+            case NOT_LOADED:
+                labelSystemStatus.setText("'" + systemName + "' could not be loaded. Are proper permissions set and the file available?");
                 break;
             case NOT_PROVIDED:
                 labelSystemStatus.setText("Please provide a valid UPPAAL system path.");
@@ -276,24 +279,36 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
 
     @Override
     public void setQueriesStatus(final Status status, final String queriesName) {
+        if (status == Status.OK) {
+            setQueriesStatusOK(queriesName);
+        } else {
+            setQueriesStatusError(status, queriesName);
+        }
+    }
+
+    private void setQueriesStatusError(final Status status, final String queriesName) {
         switch (status) {
             case NOT_FOUND:
-                labelQueriesStatus.setForeground(Styles.COLOR_ERROR);
                 labelQueriesStatus.setText("Path does not identity an existing file.");
                 break;
+            case NOT_LOADED:
+                labelSystemStatus.setText("'" + queriesName + "' could not be loaded. Are proper permissions set and the file available?");
+                break;
             case NOT_PROVIDED:
-                labelQueriesStatus.setForeground(Styles.COLOR_ERROR);
                 labelQueriesStatus.setText("Please provide a valid UPPAAL queries file (*.q) path.");
                 break;
             case NOT_VALID:
-                labelQueriesStatus.setForeground(Styles.COLOR_ERROR);
                 labelQueriesStatus.setText("Path does not identity a valid UPPAAL queries file.");
                 break;
-            case OK:
-                labelQueriesStatus.setForeground(Styles.COLOR_FOREGROUND_PRIMARY);
-                labelQueriesStatus.setText(queriesName + " ");
-                break;
+            default:
+                throw new IllegalStateException("Unhandled status: " + status);
         }
+        labelQueriesStatus.setForeground(Styles.COLOR_ERROR);
+    }
+
+    private void setQueriesStatusOK(final String queriesName) {
+        labelQueriesStatus.setForeground(Styles.COLOR_FOREGROUND_PRIMARY);
+        labelQueriesStatus.setText(queriesName + " ");
     }
 
     @Override
