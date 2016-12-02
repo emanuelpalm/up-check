@@ -48,6 +48,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     private final EventBroker<String> onSystemPath = new EventBroker<>();
     private final EventBroker<String> onQueriesPath = new EventBroker<>();
     private final EventBroker<ViewVerifySystem.Queries> onQueriesSave = new EventBroker<>();
+    private final EventBroker<Void> onReportClear = new EventBroker<>();
     private final EventBroker<ViewVerifySystem.Queries> onReportRequest = new EventBroker<>();
 
     private JLabel labelSystemStatus;
@@ -213,6 +214,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                                         JOptionPane.WARNING_MESSAGE);
                                 if (option == JOptionPane.OK_OPTION) {
                                     textAreaReport.setText("");
+                                    onReportClear.publish(null);
                                 }
                             });
                         }});
@@ -258,6 +260,11 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     @Override
     public EventPublisher<ViewVerifySystem.Queries> onQueriesSave() {
         return onQueriesSave;
+    }
+
+    @Override
+    public EventPublisher<Void> onReportCleared() {
+        return onReportClear;
     }
 
     @Override

@@ -17,14 +17,16 @@ import java.util.stream.Collectors;
 
 /**
  * Holds a collection of UPPAAL queries that may be asked against some {@link UppaalSystem} using a {@link UppaalProxy}.
+ * <p>
+ * Not thread safe.
  */
 public class UppaalQueries {
     private static final Predicate<String> IS_COMMENT_LINE = Pattern.compile("\\s*//.*").asPredicate();
     private static final Charset CHARSET = StandardCharsets.UTF_8;
 
-    private final String original;
     private final EventBroker<UppaalQuery> onQueryUpdated = new EventBroker<>();
 
+    private String original;
     private Set<UppaalQuery> queries;
 
     private UppaalQueries(final String original) {
@@ -91,6 +93,14 @@ public class UppaalQueries {
     }
 
     /**
+     * Clears all contained queries.
+     */
+    public void clear() {
+        original = "";
+        queries.clear();
+    }
+
+    /**
      * Replaces the current set of queries with those found in the given string.
      * <p>
      * Any differences between the given set of queries and the current set of queries are published via {@link
@@ -105,6 +115,7 @@ public class UppaalQueries {
                 onQueryUpdated.publish(query);
             }
         }
+        original = string;
         queries = newQueries;
     }
 

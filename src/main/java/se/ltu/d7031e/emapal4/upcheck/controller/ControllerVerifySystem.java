@@ -101,6 +101,7 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                 view.showException(null, e);
             }
         };
+        final Consumer<Void> clearReport = nil -> uppaalQueries.clear();
         final Consumer<ViewVerifySystem.Queries> generateReport = queries -> uppaalQueries.update(queries.data());
         final Consumer<UppaalQuery> handleQuery = query -> {
             view.addReport("#> Query on line " + query.lineNumber() + " updated: " + query.data());
@@ -116,6 +117,7 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
         view.onSystemPath().subscribe(setSystemPath);
         view.onQueriesPath().subscribe(setQueriesPath);
         view.onQueriesSave().subscribe(saveQueries);
+        view.onReportCleared().subscribe(clearReport);
         view.onReportRequest().subscribe(generateReport);
         uppaalQueries.onQueryUpdated().subscribe(handleQuery);
 

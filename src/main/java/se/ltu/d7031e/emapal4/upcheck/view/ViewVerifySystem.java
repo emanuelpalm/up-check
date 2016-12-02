@@ -22,6 +22,11 @@ public interface ViewVerifySystem extends View {
     EventPublisher<Queries> onQueriesSave();
 
     /**
+     * @return UPPAAL system report clear event publisher
+     */
+    EventPublisher<Void> onReportCleared();
+
+    /**
      * @return UPPAAL system report request event publisher
      */
     EventPublisher<Queries> onReportRequest();
