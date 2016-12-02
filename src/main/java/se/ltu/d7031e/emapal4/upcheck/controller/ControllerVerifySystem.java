@@ -28,7 +28,7 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
     @Override
     public void register(final Navigator navigator, final ViewVerifySystem view) {
         final AtomicReference<UppaalSystem> atomicUppaalSystem = new AtomicReference<>();
-        final UppaalQueries uppaalQueries = UppaalQueries.readString("");
+        final UppaalQueries uppaalQueries = new UppaalQueries();
 
         final Consumer<String> setSystemPath = pathString -> {
             final String name = Paths.get(pathString).getFileName().toString();

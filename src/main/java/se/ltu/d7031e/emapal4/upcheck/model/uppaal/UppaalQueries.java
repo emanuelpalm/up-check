@@ -18,16 +18,25 @@ import java.util.stream.Collectors;
 /**
  * Holds a collection of UPPAAL queries that may be asked against some {@link UppaalSystem} using a {@link UppaalProxy}.
  * <p>
- * Not thread safe.
+ * Thread safe.
  */
 public class UppaalQueries {
     private static final Predicate<String> IS_COMMENT_LINE = Pattern.compile("\\s*//.*").asPredicate();
     private static final Charset CHARSET = StandardCharsets.UTF_8;
 
     private final EventBroker<UppaalQuery> onQueryUpdated = new EventBroker<>();
+    private final Object lock = new Object();
 
     private String original;
     private Set<UppaalQuery> queries;
+
+    /**
+     * Creates new empty collection of UPPAAL queries.
+     */
+    public UppaalQueries() {
+        this.original = "";
+        this.queries = Collections.emptySet();
+    }
 
     private UppaalQueries(final String original) {
         this.original = original;
@@ -96,8 +105,10 @@ public class UppaalQueries {
      * Clears all contained queries.
      */
     public void clear() {
-        original = "";
-        queries.clear();
+        synchronized (lock) {
+            original = "";
+            queries.clear();
+        }
     }
 
     /**
@@ -110,20 +121,24 @@ public class UppaalQueries {
      */
     public void update(final String string) {
         final Set<UppaalQuery> newQueries = parseBytes(string.getBytes(CHARSET), CHARSET);
-        for (final UppaalQuery query : newQueries) {
-            if (!queries.contains(query)) {
-                onQueryUpdated.publish(query);
+        synchronized (lock) {
+            for (final UppaalQuery query : newQueries) {
+                if (!queries.contains(query)) {
+                    onQueryUpdated.publish(query);
+                }
             }
+            original = string;
+            queries = newQueries;
         }
-        original = string;
-        queries = newQueries;
     }
 
     /**
      * @return unmodifiable set of {@link UppaalQuery} objects
      */
     public Set<UppaalQuery> queries() {
-        return Collections.unmodifiableSet(queries);
+        synchronized (lock) {
+            return Collections.unmodifiableSet(queries);
+        }
     }
 
     /**
