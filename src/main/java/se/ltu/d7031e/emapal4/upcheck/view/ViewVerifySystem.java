@@ -32,6 +32,11 @@ public interface ViewVerifySystem extends View {
     EventPublisher<Queries> onReportRequest();
 
     /**
+     * @return UPPAAL folder selection request event publisher
+     */
+    EventPublisher<Void> onMenuUppaalSelectInstallation();
+
+    /**
      * @param pathString path to new currently selected UPPAAL system
      */
     void setSystemPath(final String pathString);

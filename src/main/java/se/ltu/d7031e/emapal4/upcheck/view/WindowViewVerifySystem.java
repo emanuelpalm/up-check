@@ -7,6 +7,7 @@ import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.io.File;
+import java.util.Optional;
 
 /**
  * {@link WindowView} useful for verifying UPPAAL system integrity.
@@ -50,6 +51,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     private final EventBroker<ViewVerifySystem.Queries> onQueriesSave = new EventBroker<>();
     private final EventBroker<Void> onReportClear = new EventBroker<>();
     private final EventBroker<ViewVerifySystem.Queries> onReportRequest = new EventBroker<>();
+    private final EventBroker<Void> onMenuUppaalSelectInstallation = new EventBroker<>();
 
     private JLabel labelSystemStatus;
 
@@ -238,6 +240,15 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     }
 
     @Override
+    public Optional<Menu> menu() {
+        return Optional.of(new Menu.Category("Settings",
+                new Menu.Category("UPPAAL",
+                        new Menu.Option("Reset ...", () -> onMenuUppaalSelectInstallation.publish(null))
+                )
+        ));
+    }
+
+    @Override
     public JPanel panel() {
         return root;
     }
@@ -270,6 +281,11 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     @Override
     public EventPublisher<ViewVerifySystem.Queries> onReportRequest() {
         return onReportRequest;
+    }
+
+    @Override
+    public EventPublisher<Void> onMenuUppaalSelectInstallation() {
+        return onMenuUppaalSelectInstallation;
     }
 
     @Override

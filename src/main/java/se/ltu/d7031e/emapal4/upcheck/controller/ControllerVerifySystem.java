@@ -131,6 +131,7 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
         view.onQueriesSave().subscribe(saveQueries);
         view.onReportCleared().subscribe(clearReport);
         view.onReportRequest().subscribe(generateReport);
+        view.onMenuUppaalSelectInstallation().subscribe(reselectUppaalInstallationFolder);
         uppaalQueries.onQueryUpdated().subscribe(handleQuery);
 
         // Initialize.

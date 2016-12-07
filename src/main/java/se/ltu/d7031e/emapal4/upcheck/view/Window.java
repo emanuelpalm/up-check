@@ -6,6 +6,7 @@ import se.ltu.d7031e.emapal4.upcheck.util.ResourceLoader;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.ByteArrayOutputStream;
@@ -52,6 +53,7 @@ class Window implements Renderer<WindowView> {
         SwingUtilities.invokeLater(() -> {
             try {
                 frame.setVisible(false);
+                frame.setJMenuBar(new JMenuBar());
                 {
                     final Container content = frame.getContentPane();
                     content.removeAll();
@@ -60,6 +62,32 @@ class Window implements Renderer<WindowView> {
                     }
                     content.add(view.panel());
                 }
+                view.menu().ifPresent(menu -> {
+                    final JMenu menu0 = menu.visit(new JMenu(), new View.Menu.Visitor<JMenu>() {
+                        @Override
+                        public JMenu onCategory(final JMenu context, final View.Menu.Category category) {
+                            final JMenu menu = new JMenu(category.name());
+                            context.add(menu);
+                            return menu;
+                        }
+
+                        @Override
+                        public void onOption(final JMenu context, final View.Menu.Option option) {
+                            final JMenuItem menuItem = new JMenuItem();
+                            menuItem.setAction(new AbstractAction() {
+                                @Override
+                                public void actionPerformed(final ActionEvent e) {
+                                    option.action().run();
+                                }
+                            });
+                            menuItem.setText(option.name());
+                            context.add(menuItem);
+                        }
+                    });
+                    final JMenuBar menuBar = new JMenuBar();
+                    menuBar.add(menu0.getItem(0));
+                    frame.setJMenuBar(menuBar);
+                });
                 frame.setMinimumSize(new Dimension(10, 10));
                 frame.pack();
                 frame.setMinimumSize(frame.getSize());
@@ -80,7 +108,7 @@ class Window implements Renderer<WindowView> {
 
     /**
      * @param message Message to display to application user.
-     * @param e Exception to log and display to application user.
+     * @param e       Exception to log and display to application user.
      */
     @Override
     public void showException(final String message, final Throwable e) {
