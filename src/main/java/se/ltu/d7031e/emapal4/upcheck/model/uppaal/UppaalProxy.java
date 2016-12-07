@@ -1,40 +1,50 @@
 package se.ltu.d7031e.emapal4.upcheck.model.uppaal;
 
-import se.ltu.d7031e.emapal4.upcheck.util.DynamicException;
-import se.ltu.d7031e.emapal4.upcheck.util.DynamicFactory;
-import se.ltu.d7031e.emapal4.upcheck.util.DynamicInterface;
-import se.ltu.d7031e.emapal4.upcheck.util.DynamicObject;
+import com.uppaal.engine.Engine;
+import com.uppaal.engine.Problem;
+import com.uppaal.engine.QueryVerificationResult;
+import com.uppaal.model.core2.Document;
+import com.uppaal.model.core2.PrototypeDocument;
+import com.uppaal.model.system.UppaalSystem;
 
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Mediates communication between a local UPPAAL installation and this application.
  */
 public class UppaalProxy {
-    private final DynamicFactory dynamicFactory;
-    private final DynamicObject engine;
+    private static final Pattern REGEX_UPPAAL_VERSION = Pattern.compile("(\\d+).(\\d+).(\\d+)");
+
+    private final Engine engine;
 
     /**
      * Creates new UPPAAL proxy object.
      *
      * @param uppaalFolder folder representing some local UPPAAL installation
-     * @throws UppaalProxyException Thrown if failing to to connect to local UPPAAL server.
+     * @throws UppaalProxyException thrown if failing to to connect to local UPPAAL server
      */
     public UppaalProxy(final UppaalFolder uppaalFolder) throws UppaalProxyException {
         try {
-            dynamicFactory = new DynamicFactory(new URLClassLoader(new URL[]{
-                    uppaalFolder.uppaalJar().toUri().toURL(),
-                    uppaalFolder.libModelJar().toUri().toURL()
-            }));
-            this.engine = dynamicFactory.newClassInstance("com.uppaal.engine.Engine");
-            this.engine.invoke("setServerPath", uppaalFolder.binServerExe().toString());
-            this.engine.invoke("connect");
+            engine = new Engine();
+            engine.setServerPath(uppaalFolder.binServerExe().toString());
+            engine.connect();
+
+            final String version = engine.getVersion();
+            final Matcher matcher = REGEX_UPPAAL_VERSION.matcher(version);
+            if (!matcher.find()) {
+                throw new UppaalProxyException(UppaalProxyStatus.ENGINE_INCOMPATIBLE, new IllegalStateException("Unknown UPPAAL engine version: " + version));
+            }
+            final int major = Integer.parseInt(matcher.group(1));
+            final int minor = Integer.parseInt(matcher.group(2));
+            if (major == 4 && minor < 1 || major < 4) {
+                throw new UppaalProxyException(UppaalProxyStatus.ENGINE_INCOMPATIBLE, new IllegalStateException("Incompatible UPPAAL engine version: " + version));
+            }
+        } catch (final LinkageError e) {
+            throw new UppaalProxyException(UppaalProxyStatus.ENGINE_INCOMPATIBLE, e);
 
         } catch (final Throwable e) {
             throw new UppaalProxyException(UppaalProxyStatus.ENGINE_NOT_CONNECTED, e);
@@ -46,33 +56,25 @@ public class UppaalProxy {
      *
      * @param pathString identifies local filesystem location where UPPAAL system is located
      * @return object useful for interacting with UPPAAL system
-     * @throws UppaalProxyException Thrown if failing to resolve provided path
+     * @throws UppaalProxyException thrown if failing to resolve provided path
      */
-    public UppaalSystem loadSystemAt(final String pathString) throws UppaalProxyException {
+    public UppaalSystem loadSystemAt(final String pathString) throws Throwable {
         try {
-            final DynamicObject prototypeDocument = dynamicFactory.newClassInstance("com.uppaal.model.core2.PrototypeDocument");
-            final DynamicObject document = prototypeDocument.invoke("load", Paths.get(pathString).toUri().toURL());
+            final PrototypeDocument prototypeDocument = new PrototypeDocument();
+            final Document document = prototypeDocument.load(Paths.get(pathString).toUri().toURL());
 
-            // UPPAAL version 4.0.x stores problems in a Vector, while version 4.1+ uses an ArrayList.
-            List<?> problems = new ArrayList<>();
-            DynamicObject uppaalSystem;
-            try {
-                uppaalSystem = engine.invoke("getSystem", document.unwrap(), problems);
-
-            } catch (final DynamicException e) {
-                if (!(e.getCause() instanceof NoSuchMethodException)) {
-                    throw e;
-                }
-                problems = new Vector();
-                uppaalSystem = engine.invoke("getSystem", document.unwrap(), problems);
-            }
+            final ArrayList<Problem> problems = new ArrayList<>();
+            final UppaalSystem uppaalSystem = engine.getSystem(document, problems);
             if (problems.size() > 0) {
-                throw new UppaalProxyException(UppaalProxyStatus.SYSTEM_NOT_VALID);
+                throw new UppaalProxyException(UppaalProxyStatus.SYSTEM_NOT_VALID, new Exception(problems.toString()));
             }
-            return new UppaalSystem(uppaalSystem);
+            return uppaalSystem;
 
         } catch (final MalformedURLException e) {
             throw new UppaalProxyException(UppaalProxyStatus.SYSTEM_NOT_FOUND, e);
+
+        } catch (final Throwable e) {
+            throw new UppaalProxyException(UppaalProxyStatus.ENGINE_INCOMPATIBLE, e);
         }
     }
 
@@ -83,16 +85,17 @@ public class UppaalProxy {
      * @param query  target query
      * @return query result
      */
-    public UppaalQueryResult query(final UppaalSystem system, final String query) {
-        final DynamicInterface queryFeedback = dynamicFactory.newInterfaceInstance("com.uppaal.engine.QueryFeedback");
-        final UppaalQueryResult queryResult = new UppaalQueryResult(queryFeedback);
-        final Object unwrappedSystem = system.dynamicObject().unwrap();
+    public UppaalQueryResult query(final UppaalSystem system, final String query) throws Throwable {
+        try {
+            final UppaalQueryResult queryResult = new UppaalQueryResult();
 
-        // TODO: Do something more useful with result.
-        final char result = (char)engine
-                .method("query", unwrappedSystem.getClass(), String.class, String.class, dynamicFactory.loadClass("com.uppaal.engine.QueryFeedback"))
-                .invoke(unwrappedSystem, "trace 1", query, queryFeedback.unwrap());
+            final QueryVerificationResult result = engine.query(system, "trace 1", query, queryResult);
 
-        return queryResult;
+            System.out.println(result);
+            return queryResult;
+
+        } catch (final LinkageError e) {
+            throw new UppaalProxyException(UppaalProxyStatus.ENGINE_INCOMPATIBLE, e);
+        }
     }
 }

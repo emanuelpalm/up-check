@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Optional;
@@ -54,6 +55,9 @@ class Window implements Renderer<WindowView> {
                 {
                     final Container content = frame.getContentPane();
                     content.removeAll();
+                    if (view == null) {
+                        return;
+                    }
                     content.add(view.panel());
                 }
                 frame.setMinimumSize(new Dimension(10, 10));
@@ -108,5 +112,10 @@ class Window implements Renderer<WindowView> {
         } catch (final Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        frame.dispose();
     }
 }

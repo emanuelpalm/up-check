@@ -2,24 +2,33 @@ package se.ltu.d7031e.emapal4.upcheck.controller;
 
 import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalFolder;
 import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalFolderException;
-import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalProxy;
 import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalFolderStatus;
 import se.ltu.d7031e.emapal4.upcheck.model.user.UserData;
 import se.ltu.d7031e.emapal4.upcheck.view.ViewLocateUppaal;
+
+import java.util.function.Consumer;
 
 /**
  * Controls interactions between {@link ViewLocateUppaal} instance and model.
  */
 public class ControllerLocateUppaal implements Controller<ViewLocateUppaal> {
+    private final Consumer<UppaalFolder> consumerUppaalFolder;
+
+    /**
+     * @param consumerUppaalFolder function executed when a valid UPPAAL folder has been selected
+     */
+    public ControllerLocateUppaal(final Consumer<UppaalFolder> consumerUppaalFolder) {
+        this.consumerUppaalFolder = consumerUppaalFolder;
+    }
+
     @Override
     public void register(final Navigator navigator, final ViewLocateUppaal view) {
         view.onConfirmPath().subscribe(pathString -> {
             try {
                 final UppaalFolder uppaalFolder = UppaalFolder.create(pathString);
-                final UppaalProxy uppaalProxy = new UppaalProxy(uppaalFolder);
-
                 UserData.setUppaalFolderRoot(pathString);
-                navigator.navigateTo(new ControllerVerifySystem(uppaalProxy));
+                navigator.navigateTo(null);
+                consumerUppaalFolder.accept(uppaalFolder);
 
             } catch (final UppaalFolderException e) {
                 view.setPathStatus(toPathStatus(e.status()));

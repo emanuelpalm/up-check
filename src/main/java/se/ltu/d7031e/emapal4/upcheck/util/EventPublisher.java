@@ -7,14 +7,8 @@ import java.util.function.Consumer;
  */
 public interface EventPublisher<Event> {
     /**
-     * @param subscriber Receiver of future published events.
-     * @return Provided receiver.
+     * @param subscriber receiver of subsequently published events
+     * @return subscription handler
      */
-    Consumer<Event> subscribe(final Consumer<Event> subscriber);
-
-    /**
-     * @param subscriber Previously registered event receiver to stop receiving events.
-     * @return If a subscriber was removed, {@code true}. In any other case, {@code false}.
-     */
-    boolean unsubscribe(final Consumer<Event> subscriber);
+    EventSubscription subscribe(final Consumer<Event> subscriber);
 }

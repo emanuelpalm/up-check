@@ -2,10 +2,12 @@ package se.ltu.d7031e.emapal4.upcheck.view;
 
 import se.ltu.d7031e.emapal4.upcheck.util.EventPublisher;
 
+import java.io.Closeable;
+
 /**
  * Renders some current {@link View}, causing it to be visible to the application user.
  */
-public interface Renderer<V extends View> {
+public interface Renderer<V extends View> extends Closeable {
     /**
      * @return Renderer close event publisher.
      */

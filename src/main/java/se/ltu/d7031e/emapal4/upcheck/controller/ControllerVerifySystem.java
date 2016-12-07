@@ -1,5 +1,6 @@
 package se.ltu.d7031e.emapal4.upcheck.controller;
 
+import com.uppaal.model.system.UppaalSystem;
 import se.ltu.d7031e.emapal4.upcheck.model.uppaal.*;
 import se.ltu.d7031e.emapal4.upcheck.model.user.UserData;
 import se.ltu.d7031e.emapal4.upcheck.view.ViewVerifySystem;
@@ -41,6 +42,9 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
 
             } catch (final UppaalProxyException e) {
                 switch (e.status()) {
+                    case ENGINE_INCOMPATIBLE:
+                        view.showException("It seems like the used UPPAAL engine isn't compatible with UpCheck.", e);
+                        break;
                     case ENGINE_NOT_CONNECTED:
                         view.showException("Failed to connect to UPPAAL engine.", e.getCause());
                         break;
@@ -104,14 +108,19 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
         final Consumer<Void> clearReport = nil -> uppaalQueries.clear();
         final Consumer<ViewVerifySystem.Queries> generateReport = queries -> uppaalQueries.update(queries.data());
         final Consumer<UppaalQuery> handleQuery = query -> {
-            view.addReport("#> Query on line " + query.lineNumber() + " updated: " + query.data());
-            final UppaalSystem uppaalSystem = atomicUppaalSystem.get();
-            if (uppaalSystem == null) {
-                view.addReport("!> No available UPPAAL system. Nothing to report.");
-                return;
+            try {
+                view.addReport("#> Query on line " + query.lineNumber() + " updated: " + query.data());
+                final UppaalSystem uppaalSystem = atomicUppaalSystem.get();
+                if (uppaalSystem == null) {
+                    view.addReport("!> No available UPPAAL system. Nothing to report.");
+                    return;
+                }
+                final UppaalQueryResult uppaalQueryResult = uppaalProxy.query(uppaalSystem, query.data());
+                view.addReport(uppaalQueryResult.toString());
+
+            } catch (final Throwable e) {
+                view.showException(null, e);
             }
-            final UppaalQueryResult uppaalQueryResult = uppaalProxy.query(uppaalSystem, query.data());
-            view.addReport(uppaalQueryResult.toString());
         };
 
         view.onSystemPath().subscribe(setSystemPath);

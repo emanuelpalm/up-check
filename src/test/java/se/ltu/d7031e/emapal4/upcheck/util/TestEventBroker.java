@@ -3,10 +3,8 @@ package se.ltu.d7031e.emapal4.upcheck.util;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class TestEventBroker {
     @Test
@@ -35,14 +33,12 @@ public class TestEventBroker {
         {
             final EventBroker<Integer> publisher = new EventBroker<>();
 
-            final Consumer<Integer> s0 = publisher.subscribe(counter0::getAndAdd);
-            final Consumer<Integer> s1 = publisher.subscribe(counter1::getAndAdd);
+            final EventSubscription s0 = publisher.subscribe(counter0::getAndAdd);
+            final EventSubscription s1 = publisher.subscribe(counter1::getAndAdd);
 
-            assertTrue(publisher.unsubscribe(s0));
-
+            s0.cancel();
             publisher.publish(1234);
-
-            assertTrue(publisher.unsubscribe(s1));
+            s1.cancel();
         }
         assertEquals(0, counter0.get());
         assertEquals(1235, counter1.get());

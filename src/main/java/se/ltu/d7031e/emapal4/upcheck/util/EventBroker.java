@@ -19,16 +19,15 @@ public class EventBroker<Event> implements EventPublisher<Event> {
     }
 
     @Override
-    public Consumer<Event> subscribe(final Consumer<Event> subscriber) {
+    public EventSubscription subscribe(final Consumer<Event> subscriber) {
         if (subscribers == null) {
             subscribers = new ArrayList<>(1);
         }
         subscribers.add(subscriber);
-        return subscriber;
-    }
-
-    @Override
-    public boolean unsubscribe(final Consumer<Event> subscriber) {
-        return subscribers != null && subscribers.remove(subscriber);
+        return () -> {
+            if (subscribers != null) {
+                subscribers.remove(subscriber);
+            }
+        };
     }
 }

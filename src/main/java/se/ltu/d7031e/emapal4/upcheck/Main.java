@@ -1,6 +1,5 @@
 package se.ltu.d7031e.emapal4.upcheck;
 
-import se.ltu.d7031e.emapal4.upcheck.controller.ControllerLocateUppaal;
 import se.ltu.d7031e.emapal4.upcheck.controller.ControllerVerifySystem;
 import se.ltu.d7031e.emapal4.upcheck.controller.Navigator;
 import se.ltu.d7031e.emapal4.upcheck.model.uppaal.UppaalFolder;
@@ -13,23 +12,27 @@ import se.ltu.d7031e.emapal4.upcheck.view.Renderers;
 
 /**
  * Application main class.
- *
- * Only contains main function.
+ * <p>
+ * The application requires files from a local UPPAAL installation to be available on the classpath. This is achieved
+ * via the {@link Bootstrap} class, containing its own main method used to help a user to locate the mentioned UPPAAL
+ * folder.
  */
-public class Main {
+public final class Main {
+    /**
+     * Signals to the application {@link Bootstrap} that the application should be bootstrapped again.
+     */
+    static final int EXIT_STATUS_REBOOT = 2;
+
     /**
      * Application main function.
      *
-     * @param args Provided application command line arguments.
+     * @param args provided application command line arguments
      */
     public static void main(final String[] args) throws Exception {
-        System.out.println("UpCheck");
+        System.out.println("UpCheck - Running ...");
 
         final Renderer<?> renderer = Renderers.CreateWindowRenderer();
-        renderer.onClose().subscribe(nil -> {
-            System.out.println("Bye!");
-            System.exit(0);
-        });
+        renderer.onClose().subscribe(nil -> System.exit(0));
 
         final Navigator navigator = new Navigator(renderer);
         try {
@@ -39,12 +42,9 @@ public class Main {
             final ControllerVerifySystem controllerVerifySystem = new ControllerVerifySystem(uppaalProxy);
             navigator.navigateTo(controllerVerifySystem);
 
-        } catch (final UppaalFolderException e) {
-            navigator.navigateTo(new ControllerLocateUppaal());
-
-        } catch (final UppaalProxyException e) {
+        } catch (final UppaalProxyException | UppaalFolderException e) {
             renderer.showException(null, e);
-            navigator.navigateTo(new ControllerLocateUppaal());
+            System.exit(EXIT_STATUS_REBOOT);
 
         } catch (final Throwable e) {
             renderer.showException(null, e);

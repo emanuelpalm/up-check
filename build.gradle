@@ -1,6 +1,6 @@
 apply plugin: 'application'
 
-mainClassName = 'se.ltu.d7031e.emapal4.upcheck.Main'
+mainClassName = 'se.ltu.d7031e.emapal4.upcheck.Bootstrap'
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
@@ -8,7 +8,25 @@ repositories {
     jcenter()
 }
 
+configurations {
+    providedCompile
+}
+
+compileJava {
+    sourceSets.main.compileClasspath += configurations.providedCompile
+}
+
+run {
+    classpath += configurations.providedCompile
+}
+
 dependencies {
+    // Due to copyright reasons, this file is not included in the repository.
+    // In order to compile this project, you need to download UPPAAL 4.1+ from
+    // either http://uppaal.com or http://uppaal.org. Copy the lib/model.jar
+    // file from the distribution to the location below.
+    providedCompile files('lib/uppaal/model.jar')
+
     compile 'org.reflections:reflections:0.9.10'
 
     testCompile 'junit:junit:4.12'

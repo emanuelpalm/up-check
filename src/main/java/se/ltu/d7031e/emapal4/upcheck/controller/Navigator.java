@@ -40,6 +40,10 @@ public class Navigator {
      * @throws ReflectiveOperationException A reflection operation failed.
      */
     public void navigateTo(final Controller<? extends View> controller) throws ReflectiveOperationException {
+        if (controller == null) {
+            rendererMethodSetView.invoke(renderer, new Object[]{null});
+            return;
+        }
         final Class<? extends View> viewClass = controller.viewClass();
         final Method controllerMethodRegister = controller
                 .getClass()

@@ -22,7 +22,7 @@ public class UppaalProxyException extends Exception {
     }
 
     /**
-     * @return UPPAAL proxy status.
+     * @return UPPAAL proxy status
      */
     public UppaalProxyStatus status() {
         return status;

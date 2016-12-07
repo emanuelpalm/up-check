@@ -1,5 +1,6 @@
 package se.ltu.d7031e.emapal4.upcheck.model.uppaal;
 
+import com.uppaal.model.system.UppaalSystem;
 import se.ltu.d7031e.emapal4.upcheck.util.EventBroker;
 import se.ltu.d7031e.emapal4.upcheck.util.EventPublisher;
 

@@ -12,10 +12,13 @@ import java.nio.file.Paths;
 public class UppaalFolder {
     private final Path binServerExe;
     private final Path libModelJar;
+    private final Path root;
     private final Path uppaalJar;
 
     private UppaalFolder(final Path root) {
-        this.binServerExe = new OsFactory<Path>() {
+        this.root = root;
+
+        binServerExe = new OsFactory<Path>() {
             @Override
             protected Path createOnLinux() {
                 return root.resolve("bin-Linux/server");
@@ -31,7 +34,7 @@ public class UppaalFolder {
                 return root.resolve("bin-Win32\\server.exe");
             }
         }.create();
-        this.libModelJar = new OsFactory<Path>() {
+        libModelJar = new OsFactory<Path>() {
             @Override
             protected Path createOnLinux() {
                 return root.resolve("lib/model.jar");
@@ -47,7 +50,7 @@ public class UppaalFolder {
                 return root.resolve("lib\\model.jar");
             }
         }.create();
-        this.uppaalJar = new OsFactory<Path>() {
+        uppaalJar = new OsFactory<Path>() {
             @Override
             protected Path createOnLinux() {
                 return root.resolve("uppaal.jar");
@@ -68,9 +71,9 @@ public class UppaalFolder {
     /**
      * Attempts to create new UPPAAL installation folder object.
      *
-     * @param pathString Path to installation folder root.
-     * @return UPPAAL folder object.
-     * @throws UppaalFolderException In case of provided folder being invalid.
+     * @param pathString path to installation folder root
+     * @return UPPAAL folder object
+     * @throws UppaalFolderException in case of provided folder being invalid
      */
     public static UppaalFolder create(final String pathString) throws UppaalFolderException {
         if (pathString == null || pathString.length() == 0) {
@@ -96,8 +99,8 @@ public class UppaalFolder {
     /**
      * Validates provided UPPAAL installation folder root path.
      *
-     * @param pathString Path to installation folder root.
-     * @return Validity status of provided path.
+     * @param pathString path to installation folder root
+     * @return validity status of provided path
      */
     public static UppaalFolderStatus validate(final String pathString) {
         try {
@@ -128,5 +131,10 @@ public class UppaalFolder {
      */
     public Path uppaalJar() {
         return uppaalJar;
+    }
+
+    @Override
+    public String toString() {
+        return root.toString();
     }
 }
