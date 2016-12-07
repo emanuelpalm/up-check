@@ -54,7 +54,7 @@ class WindowDialogError {
             panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 
             if (message != null) {
-                final JLabel labelMessage = new JLabel("<html><p style=\"width: 368px\">" + message + "</p></html>");
+                final JLabel labelMessage = new JLabel("<html><p style=\"width: 368px\">" + message.replace("\n", "<br/>") + "</p></html>");
                 labelMessage.setAlignmentX(Component.LEFT_ALIGNMENT);
                 labelMessage.setBorder(Styles.BORDER_EMPTY_MEDIUM);
                 labelMessage.setFont(Styles.FONT_ERROR);

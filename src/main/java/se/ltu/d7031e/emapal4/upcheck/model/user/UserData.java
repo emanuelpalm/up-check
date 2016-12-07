@@ -4,9 +4,7 @@ import se.ltu.d7031e.emapal4.upcheck.util.OsFactory;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Properties;
@@ -18,7 +16,6 @@ public class UserData {
     private static final String KEY_UPPAAL_FOLDER_ROOT = "UPPAAL_FOLDER_ROOT";
     private static final String KEY_UPPAAL_QUERIES_PATH = "UPPAAL_QUERIES_PATH";
     private static final String KEY_UPPAAL_SYSTEM_PATH = "UPPAAL_SYSTEM_PATH";
-
 
     /**
      * @return path to local UPPAAL installation, if any known
@@ -64,10 +61,9 @@ public class UserData {
 
     private static class UserProperties {
         private static final Path path;
-        private static final Properties properties = new Properties();
 
         private static String get(final String key) {
-            final String pathString = properties.getProperty(key);
+            final String pathString = loadProperties().getProperty(key);
             if (pathString != null) {
                 return pathString;
             }
@@ -76,6 +72,7 @@ public class UserData {
 
         private static void set(final String key, final String value) {
             Objects.requireNonNull(key);
+            final Properties properties = loadProperties();
             if (value == null) {
                 properties.setProperty(key, "");
             } else {
@@ -83,6 +80,17 @@ public class UserData {
             }
             try {
                 properties.storeToXML(Files.newOutputStream(path), LocalDateTime.now().toString());
+
+            } catch (final IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        private static Properties loadProperties() {
+            try {
+                final Properties properties = new Properties();
+                properties.loadFromXML(Files.newInputStream(path));
+                return properties;
 
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
@@ -107,9 +115,7 @@ public class UserData {
                 }
             }.create();
             try {
-                if (Files.exists(path)) {
-                    properties.loadFromXML(Files.newInputStream(path));
-                } else {
+                if (!Files.exists(path)) {
                     Files.createDirectories(path.getParent());
                 }
             } catch (final IOException e) {

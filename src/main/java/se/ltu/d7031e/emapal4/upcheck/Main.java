@@ -44,11 +44,19 @@ public final class Main {
 
         } catch (final UppaalProxyException | UppaalFolderException e) {
             renderer.showException(null, e);
-            System.exit(EXIT_STATUS_REBOOT);
+            UserData.setUppaalFolderRoot(null);
+            reboot();
 
         } catch (final Throwable e) {
             renderer.showException(null, e);
             System.exit(1);
         }
+    }
+
+    /**
+     * Exists application and signals to {@link Bootstrap} process that a reboot is requested.
+     */
+    public static void reboot() {
+        System.exit(EXIT_STATUS_REBOOT);
     }
 }

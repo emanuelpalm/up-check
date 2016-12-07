@@ -1,12 +1,14 @@
 package se.ltu.d7031e.emapal4.upcheck.model.uppaal;
 
 import com.uppaal.engine.Engine;
+import com.uppaal.engine.EngineException;
 import com.uppaal.engine.Problem;
 import com.uppaal.engine.QueryVerificationResult;
 import com.uppaal.model.core2.Document;
 import com.uppaal.model.core2.PrototypeDocument;
 import com.uppaal.model.system.UppaalSystem;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -36,17 +38,17 @@ public class UppaalProxy {
             final String version = engine.getVersion();
             final Matcher matcher = REGEX_UPPAAL_VERSION.matcher(version);
             if (!matcher.find()) {
-                throw new UppaalProxyException(UppaalProxyStatus.ENGINE_INCOMPATIBLE, new IllegalStateException("Unknown UPPAAL engine version: " + version));
+                throw new UppaalProxyException(UppaalProxyStatus.ENGINE_INCOMPATIBLE, "Unknown UPPAAL engine version:\n" + version);
             }
             final int major = Integer.parseInt(matcher.group(1));
             final int minor = Integer.parseInt(matcher.group(2));
             if (major == 4 && minor < 1 || major < 4) {
-                throw new UppaalProxyException(UppaalProxyStatus.ENGINE_INCOMPATIBLE, new IllegalStateException("Incompatible UPPAAL engine version: " + version));
+                throw new UppaalProxyException(UppaalProxyStatus.ENGINE_INCOMPATIBLE, "Incompatible UPPAAL engine version:\n" + version);
             }
         } catch (final LinkageError e) {
             throw new UppaalProxyException(UppaalProxyStatus.ENGINE_INCOMPATIBLE, e);
 
-        } catch (final Throwable e) {
+        } catch (final RuntimeException | IOException | EngineException e) {
             throw new UppaalProxyException(UppaalProxyStatus.ENGINE_NOT_CONNECTED, e);
         }
     }
@@ -66,7 +68,7 @@ public class UppaalProxy {
             final ArrayList<Problem> problems = new ArrayList<>();
             final UppaalSystem uppaalSystem = engine.getSystem(document, problems);
             if (problems.size() > 0) {
-                throw new UppaalProxyException(UppaalProxyStatus.SYSTEM_NOT_VALID, new Exception(problems.toString()));
+                throw new UppaalProxyException(UppaalProxyStatus.SYSTEM_NOT_VALID, problems.toString());
             }
             return uppaalSystem;
 

@@ -7,17 +7,18 @@ public class UppaalProxyException extends Exception {
     private final UppaalProxyStatus status;
 
     /**
-     * Creates new exception with provided UPPAAL proxy status.
-     */
-    UppaalProxyException(final UppaalProxyStatus status) {
-        this.status = status;
-    }
-
-    /**
      * Creates new exception with provided UPPAAL proxy status and cause.
      */
     UppaalProxyException(final UppaalProxyStatus status, final Throwable cause) {
         super(cause);
+        this.status = status;
+    }
+
+    /**
+     * Creates new exception with provided UPPAAL proxy status and message.
+     */
+    UppaalProxyException(final UppaalProxyStatus status, final String message) {
+        super(message);
         this.status = status;
     }
 
