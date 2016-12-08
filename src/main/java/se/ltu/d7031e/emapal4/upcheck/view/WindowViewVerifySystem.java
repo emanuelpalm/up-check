@@ -290,25 +290,29 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
 
     @Override
     public void setSystemPath(final String pathString) {
-        if (pathString != null) {
-            final File file = new File(pathString);
-            fileChooserSystem.setSelectedFile(file);
-            fileChooserQueries.setCurrentDirectory(file.getParentFile());
-        }
+        SwingUtilities.invokeLater(() -> {
+            if (pathString != null) {
+                final File file = new File(pathString);
+                fileChooserSystem.setSelectedFile(file);
+                fileChooserQueries.setCurrentDirectory(file.getParentFile());
+            }
+        });
     }
 
     @Override
     public void setQueries(final String queries) {
-        textAreaQueries.setText(queries);
+        SwingUtilities.invokeLater(() -> textAreaQueries.setText(queries));
     }
 
     @Override
     public void setSystemStatus(final Status status, final String systemName) {
-        if (status == Status.OK) {
-            setSystemStatusOK(systemName);
-        } else {
-            setSystemStatusError(status, systemName);
-        }
+        SwingUtilities.invokeLater(() -> {
+            if (status == Status.OK) {
+                setSystemStatusOK(systemName);
+            } else {
+                setSystemStatusError(status, systemName);
+            }
+        });
     }
 
     private void setSystemStatusError(final Status status, final String systemName) {
@@ -348,21 +352,25 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
 
     @Override
     public void setQueriesPath(final String pathString) {
-        final boolean isSet = pathString != null;
-        if (isSet) {
-            fileChooserQueries.setSelectedFile(new File(pathString));
-        }
-        buttonQueriesSave.setEnabled(isSet);
-        buttonQueriesReload.setEnabled(isSet);
+        SwingUtilities.invokeLater(() -> {
+            final boolean isSet = pathString != null;
+            if (isSet) {
+                fileChooserQueries.setSelectedFile(new File(pathString));
+            }
+            buttonQueriesSave.setEnabled(isSet);
+            buttonQueriesReload.setEnabled(isSet);
+        });
     }
 
     @Override
     public void setQueriesStatus(final Status status, final String queriesName) {
-        if (status == Status.OK) {
-            setQueriesStatusOK(queriesName);
-        } else {
-            setQueriesStatusError(status, queriesName);
-        }
+        SwingUtilities.invokeLater(() -> {
+            if (status == Status.OK) {
+                setQueriesStatusOK(queriesName);
+            } else {
+                setQueriesStatusError(status, queriesName);
+            }
+        });
     }
 
     private void setQueriesStatusError(final Status status, final String queriesName) {
@@ -386,13 +394,17 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     }
 
     private void setQueriesStatusOK(final String queriesName) {
-        labelQueriesStatus.setForeground(Styles.COLOR_FOREGROUND_PRIMARY);
-        labelQueriesStatus.setText(queriesName != null ? queriesName + " " : " ");
+        SwingUtilities.invokeLater(() -> {
+            labelQueriesStatus.setForeground(Styles.COLOR_FOREGROUND_PRIMARY);
+            labelQueriesStatus.setText(queriesName != null ? queriesName + " " : " ");
+        });
     }
 
     @Override
     public void addReport(final String report) {
-        textAreaReport.setEnabled(true);
-        textAreaReport.append(report + "\r\n");
+        SwingUtilities.invokeLater(() -> {
+            textAreaReport.setEnabled(true);
+            textAreaReport.append(report + "\r\n");
+        });
     }
 }
