@@ -1,6 +1,6 @@
 package se.ltu.d7031e.emapal4.upcheck.model.uppaal;
 
-import se.ltu.d7031e.emapal4.upcheck.util.OsFactory;
+import se.ltu.d7031e.emapal4.upcheck.util.Os;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,51 +18,51 @@ public class UppaalFolder {
     private UppaalFolder(final Path root) {
         this.root = root;
 
-        binServerExe = new OsFactory<Path>() {
+        binServerExe = new Os.Factory<Path>() {
             @Override
-            protected Path createOnLinux() {
+            public Path createOnLinux() {
                 return root.resolve("bin-Linux/server");
             }
 
             @Override
-            protected Path createOnMacOsX() {
+            public Path createOnMacOsX() {
                 return root.resolve("Contents/MacOS/server");
             }
 
             @Override
-            protected Path createOnWindows() {
+            public Path createOnWindows() {
                 return root.resolve("bin-Win32\\server.exe");
             }
         }.create();
-        libModelJar = new OsFactory<Path>() {
+        libModelJar = new Os.Factory<Path>() {
             @Override
-            protected Path createOnLinux() {
+            public Path createOnLinux() {
                 return root.resolve("lib/model.jar");
             }
 
             @Override
-            protected Path createOnMacOsX() {
+            public Path createOnMacOsX() {
                 return root.resolve("Contents/Java/model.jar");
             }
 
             @Override
-            protected Path createOnWindows() {
+            public Path createOnWindows() {
                 return root.resolve("lib\\model.jar");
             }
         }.create();
-        uppaalJar = new OsFactory<Path>() {
+        uppaalJar = new Os.Factory<Path>() {
             @Override
-            protected Path createOnLinux() {
+            public Path createOnLinux() {
                 return root.resolve("uppaal.jar");
             }
 
             @Override
-            protected Path createOnMacOsX() {
+            public Path createOnMacOsX() {
                 return root.resolve("Contents/Java/uppaal.jar");
             }
 
             @Override
-            protected Path createOnWindows() {
+            public Path createOnWindows() {
                 return root.resolve("uppaal.jar");
             }
         }.create();

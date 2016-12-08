@@ -1,6 +1,6 @@
 package se.ltu.d7031e.emapal4.upcheck.model.user;
 
-import se.ltu.d7031e.emapal4.upcheck.util.OsFactory;
+import se.ltu.d7031e.emapal4.upcheck.util.Os;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -98,19 +98,19 @@ public class UserData {
         }
 
         static {
-            path = new OsFactory<Path>() {
+            path = new Os.Factory<Path>() {
                 @Override
-                protected Path createOnMacOsX() {
+                public Path createOnMacOsX() {
                     return Paths.get(System.getProperty("user.home"), "Library", "Application Support", "UpCheck", "configuration.xml");
                 }
 
                 @Override
-                protected Path createOnWindows() {
+                public Path createOnWindows() {
                     return Paths.get(System.getenv("AppData"), "UpCheck", "configuration.xml");
                 }
 
                 @Override
-                protected Path createOnOther() {
+                public Path createOnOther() {
                     return Paths.get(System.getProperty("user.home"), ".upcheckrc");
                 }
             }.create();

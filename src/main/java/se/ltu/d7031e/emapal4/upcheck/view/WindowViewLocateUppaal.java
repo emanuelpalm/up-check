@@ -2,7 +2,7 @@ package se.ltu.d7031e.emapal4.upcheck.view;
 
 import se.ltu.d7031e.emapal4.upcheck.util.EventBroker;
 import se.ltu.d7031e.emapal4.upcheck.util.EventPublisher;
-import se.ltu.d7031e.emapal4.upcheck.util.OsFactory;
+import se.ltu.d7031e.emapal4.upcheck.util.Os;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -19,9 +19,9 @@ import java.nio.file.Path;
 @SuppressWarnings("unused")
 class WindowViewLocateUppaal extends WindowView implements ViewLocateUppaal {
     private final JTextField fieldPath;
-    private final JFileChooser fileChooser = new OsFactory<JFileChooser>() {
+    private final JFileChooser fileChooser = new Os.Factory<JFileChooser>() {
         @Override
-        protected JFileChooser createOnMacOsX() {
+        public JFileChooser createOnMacOsX() {
             return new JFileChooser() {
                 {
                     final FileFilter fileFilter = new FileFilter() {
@@ -62,7 +62,7 @@ class WindowViewLocateUppaal extends WindowView implements ViewLocateUppaal {
         }
 
         @Override
-        protected JFileChooser createOnOther() {
+        public JFileChooser createOnOther() {
             return new JFileChooser() {{
                 setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                 resetChoosableFileFilters();
