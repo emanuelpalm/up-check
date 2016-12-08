@@ -3,7 +3,6 @@ package se.ltu.d7031e.emapal4.upcheck.model.uppaal;
 import com.uppaal.engine.Engine;
 import com.uppaal.engine.EngineException;
 import com.uppaal.engine.Problem;
-import com.uppaal.engine.QueryVerificationResult;
 import com.uppaal.model.core2.Document;
 import com.uppaal.model.core2.PrototypeDocument;
 import com.uppaal.model.system.UppaalSystem;
@@ -81,23 +80,13 @@ public class UppaalProxy {
     }
 
     /**
-     * Analyzes given UPPAAL system using provided query.
+     * Creates new request for given UPPAAL system to be analyzed using provided query.
      *
      * @param system UPPAAL system to analyze
      * @param query  target query
      * @return query result
      */
-    public UppaalQueryResult query(final UppaalSystem system, final String query) throws Throwable {
-        try {
-            final UppaalQueryResult queryResult = new UppaalQueryResult();
-
-            final QueryVerificationResult result = engine.query(system, "trace 1", query, queryResult);
-
-            System.out.println(result);
-            return queryResult;
-
-        } catch (final LinkageError e) {
-            throw new UppaalProxyException(UppaalProxyStatus.ENGINE_INCOMPATIBLE, e);
-        }
+    public UppaalQueryRequest request(final UppaalSystem system, final UppaalQuery query) {
+        return new UppaalQueryRequest(engine, system, query);
     }
 }

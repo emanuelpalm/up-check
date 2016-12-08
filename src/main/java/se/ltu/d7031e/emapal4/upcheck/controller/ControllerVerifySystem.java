@@ -118,8 +118,13 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                     view.addReport("!> No available UPPAAL system. Nothing to report.");
                     return;
                 }
-                final UppaalQueryResult uppaalQueryResult = uppaalProxy.query(uppaalSystem, query.data());
-                view.addReport(uppaalQueryResult.toString());
+                final UppaalQueryRequest request = uppaalProxy.request(uppaalSystem, query);
+                final UppaalQueryResult result = request.submit();
+                view.addReport("!> Query validity: " + result.status());
+
+            } catch (final UppaalQueryException e) {
+                e.printStackTrace();
+                view.addReport("!> Query failed. Reported reason: " + e.getLocalizedMessage());
 
             } catch (final Throwable e) {
                 view.showException(null, e);
