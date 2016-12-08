@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  * Mediates communication between a local UPPAAL installation and this application.
  */
 public class UppaalProxy {
-    private static final Pattern REGEX_UPPAAL_VERSION = Pattern.compile("(\\d+).(\\d+).(\\d+)");
+    private static final Pattern REGEX_UPPAAL_VERSION = Pattern.compile("(\\d{1,9}).(\\d{1,9}).(\\d{1,9})");
 
     private final Engine engine;
 
