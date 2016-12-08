@@ -40,7 +40,7 @@ public final class Bootstrap {
             } catch (final UppaalFolderException e) {
                 uppaalFolder = showLocateUppaal();
             }
-            System.out.println("Used UPPAAL installation at: " + uppaalFolder);
+            System.out.println("Using UPPAAL installation at: " + uppaalFolder);
             status = JavaProcess.exec(Main.class,
                     uppaalFolder.uppaalJar().toString(),
                     uppaalFolder.libModelJar().toString());
