@@ -62,16 +62,6 @@ public class UppaalQueries implements Iterable<UppaalQuery> {
         }
     }
 
-    /**
-     * Turns given string into unvalidated UPPAAL queries.
-     *
-     * @param string string to read
-     * @return UPPAAL queries object, which contain no queries if the provided string contained only whitespace
-     */
-    public static UppaalQueries readString(final String string) {
-        return new UppaalQueries(string);
-    }
-
     private static Set<UppaalQuery> parseBytes(final byte[] bytes, final Charset cs) {
         final AtomicInteger lineCounter = new AtomicInteger(0);
         final AtomicBoolean inComment = new AtomicBoolean(false);
