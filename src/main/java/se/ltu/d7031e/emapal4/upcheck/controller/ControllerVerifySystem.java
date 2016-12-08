@@ -132,7 +132,7 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
 
             } catch (final UppaalQueryException e) {
                 e.printStackTrace();
-                view.addReport("!> Query failed. Reported reason: " + e.getLocalizedMessage());
+                view.addReport("!> Query failed. Reason: " + e.getLocalizedMessage());
 
             } catch (final Throwable e) {
                 view.showException(null, e);
