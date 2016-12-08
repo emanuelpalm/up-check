@@ -128,6 +128,9 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
 
             } catch (final Throwable e) {
                 view.showException(null, e);
+
+            } finally {
+                view.addReport("");
             }
         };
 

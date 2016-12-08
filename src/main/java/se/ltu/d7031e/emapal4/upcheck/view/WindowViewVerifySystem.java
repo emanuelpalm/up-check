@@ -393,6 +393,6 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     @Override
     public void addReport(final String report) {
         textAreaReport.setEnabled(true);
-        textAreaReport.append(report + "\r\n\r\n");
+        textAreaReport.append(report + "\r\n");
     }
 }
