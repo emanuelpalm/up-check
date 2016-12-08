@@ -124,15 +124,6 @@ public class UppaalQueries implements Iterable<UppaalQuery> {
     }
 
     /**
-     * @return unmodifiable set of {@link UppaalQuery} objects
-     */
-    public Set<UppaalQuery> queries() {
-        synchronized (lock) {
-            return Collections.unmodifiableSet(queries);
-        }
-    }
-
-    /**
      * Publishes query updates.
      * <p>
      * A query update occurs whenever the {@link #update(String)} method is invoked, and any new queries are found who
