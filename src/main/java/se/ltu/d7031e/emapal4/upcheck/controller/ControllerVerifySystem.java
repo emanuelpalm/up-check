@@ -110,7 +110,15 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
         final Consumer<Void> clearReport = nil -> uppaalQueries.clear();
         final Consumer<ViewVerifySystem.Queries> generateReport = queries -> uppaalQueries.update(queries.data());
         final Consumer<Void> reselectUppaalInstallationFolder = nil -> resetAndReboot();
-        final Consumer<UppaalQuery> handleQuery = query -> {
+
+        view.onSystemPath().subscribe(setSystemPath);
+        view.onQueriesPath().subscribe(setQueriesPath);
+        view.onQueriesSave().subscribe(saveQueries);
+        view.onReportCleared().subscribe(clearReport);
+        view.onReportRequest().subscribe(generateReport);
+        view.onMenuUppaalSelectInstallation().subscribe(reselectUppaalInstallationFolder);
+
+        uppaalQueries.onQueryUpdated().subscribe(query -> {
             try {
                 view.addReport("#> Query on line " + query.lineNumber() + " updated: " + query.data());
                 final UppaalSystem uppaalSystem = atomicUppaalSystem.get();
@@ -132,15 +140,7 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
             } finally {
                 view.addReport("");
             }
-        };
-
-        view.onSystemPath().subscribe(setSystemPath);
-        view.onQueriesPath().subscribe(setQueriesPath);
-        view.onQueriesSave().subscribe(saveQueries);
-        view.onReportCleared().subscribe(clearReport);
-        view.onReportRequest().subscribe(generateReport);
-        view.onMenuUppaalSelectInstallation().subscribe(reselectUppaalInstallationFolder);
-        uppaalQueries.onQueryUpdated().subscribe(handleQuery);
+        });
 
         // Initialize.
         {
