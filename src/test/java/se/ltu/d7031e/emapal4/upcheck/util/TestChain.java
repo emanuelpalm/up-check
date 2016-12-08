@@ -17,6 +17,7 @@ public class TestChain {
             chain0.forEach(list0::add);
 
             assertEquals(Arrays.asList(3, 2, 1), list0);
+            assertEquals(3, list0.size());
         }
         final Chain<Integer> chain1 = chain0.prepend(4);
         {
@@ -24,6 +25,7 @@ public class TestChain {
             chain1.forEach(list1::add);
 
             assertEquals(Arrays.asList(4, 3, 2, 1), list1);
+            assertEquals(4, list1.size());
         }
     }
 }

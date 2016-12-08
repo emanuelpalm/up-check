@@ -30,6 +30,7 @@ public abstract class Chain<T> implements Iterable<T> {
      * @param <T>      element type
      * @return created chain
      */
+    @SafeVarargs
     public static <T> Chain<T> of(final T... elements) {
         Chain<T> chain = empty();
         for (int i = elements.length; i-- != 0; ) {
@@ -47,6 +48,11 @@ public abstract class Chain<T> implements Iterable<T> {
      * @return all links of chain following this
      */
     public abstract Chain<T> tail();
+
+    /**
+     * @return amount of elements in chain
+     */
+    public abstract int size();
 
     /**
      * Adds element to beginning of chain.
@@ -99,6 +105,11 @@ public abstract class Chain<T> implements Iterable<T> {
         public Chain<T> tail() {
             return next;
         }
+
+        @Override
+        public int size() {
+            return 1 + next.size();
+        }
     }
 
     private static final class End<T> extends Chain<T> {
@@ -112,6 +123,11 @@ public abstract class Chain<T> implements Iterable<T> {
         @Override
         public Chain<T> tail() {
             return this;
+        }
+
+        @Override
+        public int size() {
+            return 0;
         }
     }
 }
