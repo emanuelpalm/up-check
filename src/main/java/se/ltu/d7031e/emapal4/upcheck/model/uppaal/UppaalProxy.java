@@ -41,7 +41,7 @@ public class UppaalProxy {
             }
             final int major = Integer.parseInt(matcher.group(1));
             final int minor = Integer.parseInt(matcher.group(2));
-            if (major == 4 && minor < 1 || major < 4) {
+            if (major == 4 && minor < 1 || major != 4) {
                 throw new UppaalProxyException(UppaalProxyStatus.ENGINE_INCOMPATIBLE, "Incompatible UPPAAL engine version:\n" + version);
             }
         } catch (final LinkageError e) {
