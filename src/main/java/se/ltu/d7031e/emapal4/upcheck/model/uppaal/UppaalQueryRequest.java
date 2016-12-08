@@ -60,7 +60,6 @@ public class UppaalQueryRequest {
 
                 @Override
                 public void setTrace(final char result, final String feedback, final ArrayList<SymbolicTransition> trace, final int cycle, final QueryVerificationResult verificationResult) {
-                    System.out.println("setTrace(" + result + ", " + feedback + ", " + trace + ", " + cycle + ", " + verificationResult + ")");
                     onTrace.ifValueCreated(eventBroker -> eventBroker.publish(trace));
                 }
 
