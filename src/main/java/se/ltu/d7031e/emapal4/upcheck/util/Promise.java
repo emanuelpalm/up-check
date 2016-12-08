@@ -21,36 +21,16 @@ public class Promise<V> {
      * Registers result handler.
      *
      * @param onResult handler to receive promise result
+     * @return promise cancellation object
      */
-    public void then(final OnResult<V> onResult) {
+    public Canceller then(final OnResult<V> onResult) {
         try {
             task.execute(onResult);
 
         } catch (final Throwable exception) {
-            //noinspection unchecked
             onResult.onFailure(exception);
         }
-    }
-
-    /**
-     * Registers result handlers.
-     *
-     * @param onSuccess handler to receive successful promise result
-     * @param onFailure handler to receive erroneous promise result
-     */
-    public void then(final OnSuccess<V> onSuccess, final OnFailure onFailure) {
-        then(new OnResult<V>() {
-            @Override
-            public void onSuccess(final V value) {
-                onSuccess.onSuccess(value);
-            }
-
-            @Override
-            public void onFailure(final Throwable exception) {
-                onFailure.onFailure(exception);
-            }
-
-        });
+        return task::abort;
     }
 
     /**
@@ -60,7 +40,20 @@ public class Promise<V> {
      */
     @FunctionalInterface
     public interface Task<V> {
+        /**
+         * Executes task.
+         *
+         * @param onResult handler to receive task result
+         * @throws Throwable any exception thrown during task execution
+         */
         void execute(final OnResult<V> onResult) throws Throwable;
+
+        /**
+         * Aborts task, if the operation is supported.
+         */
+        default void abort() throws InterruptedException {
+            throw new IllegalStateException("Task abortion not supported.");
+        }
     }
 
     /**
@@ -86,5 +79,18 @@ public class Promise<V> {
     @FunctionalInterface
     public interface OnFailure {
         void onFailure(final Throwable exception);
+    }
+
+    /**
+     * Used to cancel some running {@link Task}.
+     */
+    @FunctionalInterface
+    public interface Canceller {
+        /**
+         * Signals desire for promise to never be resolved.
+         *
+         * @throws IllegalStateException if aborting is not supported by cancelled promise
+         */
+        void cancel() throws InterruptedException;
     }
 }
