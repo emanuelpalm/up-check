@@ -4,6 +4,7 @@ import com.uppaal.model.system.UppaalSystem;
 import se.ltu.d7031e.emapal4.upcheck.Main;
 import se.ltu.d7031e.emapal4.upcheck.model.uppaal.*;
 import se.ltu.d7031e.emapal4.upcheck.model.user.UserData;
+import se.ltu.d7031e.emapal4.upcheck.util.Promise;
 import se.ltu.d7031e.emapal4.upcheck.view.ViewVerifySystem;
 
 import java.io.UncheckedIOException;
@@ -11,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -129,6 +131,27 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                 final UppaalQueryRequest request = uppaalProxy.request(uppaalSystem, query);
                 final UppaalQueryResult result = request.submit();
                 view.addReport("!> Query validity: " + result.status());
+
+                if (result.status() == UppaalQueryResult.Status.FALSE) {
+                    final Duration timeout = Duration.ofSeconds(10);
+                    view.addReport("#> Attempting to find valid system fixes for " + timeout + " ...");
+                    new UppaalSystemFixer(uppaalProxy, uppaalSystem, uppaalQueries)
+                            .addStrategy(new UppaalSystemFixerStrategyRemoveTransitions())
+                            .setTimeout(timeout)
+                            .runAsync()
+                            .then(new Promise.OnResult<UppaalSystemFixerReport>() {
+                                @Override
+                                public void onSuccess(final UppaalSystemFixerReport fixerReport) {
+                                    view.addReport("!> " + fixerReport + "\r\n");
+                                }
+
+                                @Override
+                                public void onFailure(final Throwable exception) {
+                                    exception.printStackTrace();
+                                    view.addReport("!>" + exception.getLocalizedMessage() + "\r\n");
+                                }
+                            });
+                }
 
             } catch (final UppaalQueryException e) {
                 e.printStackTrace();
