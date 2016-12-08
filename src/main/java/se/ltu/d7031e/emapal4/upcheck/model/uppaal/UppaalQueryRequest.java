@@ -22,6 +22,7 @@ public class UppaalQueryRequest {
     private final UppaalQuery query;
 
     private final Lazy<EventBroker<List<SymbolicTransition>>> onTrace = new Lazy<>(EventBroker::new);
+    private final Lazy<EventBroker<Void>> onProgress = new Lazy<>(EventBroker::new);
 
     UppaalQueryRequest(final Engine engine, final UppaalSystem system, final UppaalQuery query) {
         this.engine = engine;
@@ -34,6 +35,13 @@ public class UppaalQueryRequest {
      */
     public EventPublisher<List<SymbolicTransition>> onTrace() {
         return onTrace.value();
+    }
+
+    /**
+     * @return query analysis progress event publisher
+     */
+    public EventPublisher<Void> onProgress() {
+        return onProgress.value();
     }
 
     /**
@@ -63,7 +71,9 @@ public class UppaalQueryRequest {
                 public void setLength(final int length) {}
 
                 @Override
-                public void setProgress(final int load, final long vm, final long rss, final long cached, final long avail, final long swap, final long swapfree, final long user, final long sys, final long timestamp) {}
+                public void setProgress(final int load, final long vm, final long rss, final long cached, final long avail, final long swap, final long swapfree, final long user, final long sys, final long timestamp) {
+                    onProgress.ifValueCreated(eventBroker -> eventBroker.publish(null));
+                }
 
                 @Override
                 public void setProgressAvail(final boolean availability) {}
