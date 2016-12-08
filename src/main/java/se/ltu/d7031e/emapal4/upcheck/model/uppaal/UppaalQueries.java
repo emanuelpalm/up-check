@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * <p>
  * Thread safe.
  */
-public class UppaalQueries {
+public class UppaalQueries implements Iterable<UppaalQuery> {
     private static final Predicate<String> IS_COMMENT_LINE = Pattern.compile("\\s*//.*").asPredicate();
     private static final Charset CHARSET = StandardCharsets.UTF_8;
 
@@ -152,6 +152,11 @@ public class UppaalQueries {
      */
     public EventPublisher<UppaalQuery> onQueryUpdated() {
         return onQueryUpdated;
+    }
+
+    @Override
+    public Iterator<UppaalQuery> iterator() {
+        return queries.iterator();
     }
 
     @Override
