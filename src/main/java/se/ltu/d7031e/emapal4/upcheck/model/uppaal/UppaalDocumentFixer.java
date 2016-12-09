@@ -1,5 +1,6 @@
 package se.ltu.d7031e.emapal4.upcheck.model.uppaal;
 
+import com.uppaal.model.core2.Document;
 import com.uppaal.model.system.UppaalSystem;
 import se.ltu.d7031e.emapal4.upcheck.util.Chain;
 import se.ltu.d7031e.emapal4.upcheck.util.Promise;
@@ -10,17 +11,17 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * {@link UppaalSystem} fix suggester.
+ * UPPAAL {@link Document} fix suggester.
  * <p>
- * Uses a collection of {@link UppaalSystemFixerStrategy} objects to figure out how a given {@link UppaalSystem} might
+ * Uses a collection of {@link UppaalDocumentFixerStrategy} objects to figure out how a given {@link UppaalSystem} might
  * be changed to make it conform to some {@link UppaalQueries}.
  * <p>
  * Note that the object is immutable. Any change to the object produces a modified shallow copy.
  */
-public class UppaalSystemFixer {
+public class UppaalDocumentFixer {
     private final Context context;
     private final Duration timeout;
-    private final Chain<UppaalSystemFixerStrategy> strategies;
+    private final Chain<UppaalDocumentFixerStrategy> strategies;
 
     /**
      * Creates new UPPAAL system fixer.
@@ -29,13 +30,13 @@ public class UppaalSystemFixer {
      * @param system  system to be fixed
      * @param queries queries stating properties the fixed system must conform to
      */
-    public UppaalSystemFixer(final UppaalProxy proxy, final UppaalSystem system, final UppaalQueries queries) {
+    public UppaalDocumentFixer(final UppaalProxy proxy, final UppaalSystem system, final UppaalQueries queries) {
         context = new Context(proxy, system, queries);
         timeout = Duration.ofSeconds(Long.MAX_VALUE);
         strategies = Chain.empty();
     }
 
-    private UppaalSystemFixer(final Context context, final Duration timeout, final Chain<UppaalSystemFixerStrategy> strategies) {
+    private UppaalDocumentFixer(final Context context, final Duration timeout, final Chain<UppaalDocumentFixerStrategy> strategies) {
         this.context = context;
         this.timeout = timeout;
         this.strategies = strategies;
@@ -47,8 +48,8 @@ public class UppaalSystemFixer {
      * @param strategy strategy to add
      * @return updated UPPAAL system fixer object
      */
-    public UppaalSystemFixer addStrategy(final UppaalSystemFixerStrategy strategy) {
-        return new UppaalSystemFixer(context, timeout, strategies.prepend(strategy));
+    public UppaalDocumentFixer addStrategy(final UppaalDocumentFixerStrategy strategy) {
+        return new UppaalDocumentFixer(context, timeout, strategies.prepend(strategy));
     }
 
     /**
@@ -58,46 +59,46 @@ public class UppaalSystemFixer {
      * @return updated UPPAAL system fixer object
      * @see #runAsync()
      */
-    public UppaalSystemFixer setTimeout(final Duration timeout) {
-        return new UppaalSystemFixer(context, timeout, strategies);
+    public UppaalDocumentFixer setTimeout(final Duration timeout) {
+        return new UppaalDocumentFixer(context, timeout, strategies);
     }
 
     /**
      * Starts evaluating strategies in new thread, returning promise of eventual result.
      * <p>
      * The thread will never run longer than any duration set using {@link #setTimeout(Duration)}. In case of
-     * employing multiple {@link UppaalSystemFixerStrategy} objects, each is given an equal share of the time to
+     * employing multiple {@link UppaalDocumentFixerStrategy} objects, each is given an equal share of the time to
      * execute.
      *
      * @return promise of an eventual report
      */
-    public Promise<UppaalSystemFixerReport> runAsync() {
-        return new Promise<>(new Promise.Task<UppaalSystemFixerReport>() {
+    public Promise<UppaalDocumentFixerReport> runAsync() {
+        return new Promise<>(new Promise.Task<UppaalDocumentFixerReport>() {
             private final AtomicBoolean isAborted = new AtomicBoolean(false);
             private final Object lock = this;
 
             private Thread thread = null;
 
             @Override
-            public void execute(final Promise.OnResult<UppaalSystemFixerReport> onResult) throws Throwable {
+            public void execute(final Promise.OnResult<UppaalDocumentFixerReport> onResult) throws Throwable {
                 if (isAborted.get()) {
                     return;
                 }
                 final Runnable runnable = () -> {
-                    final UppaalSystemFixerReport report = new UppaalSystemFixerReport();
+                    final UppaalDocumentFixerReport report = new UppaalDocumentFixerReport();
                     final Duration strategyTimeout = timeout.dividedBy(strategies.size());
-                    for (final UppaalSystemFixerStrategy strategy : strategies) {
+                    for (final UppaalDocumentFixerStrategy strategy : strategies) {
                         if (isAborted.get()) {
                             return;
                         }
                         final Instant strategyDeadline = Instant.now().plus(strategyTimeout);
-                        final List<UppaalSystemModification> modifications = strategy.apply(context.system, modifiedSystem -> {
+                        final List<UppaalDocumentFix> modifications = strategy.apply(context.system.getDocument(), modifiedDocument -> {
                             try {
                                 for (final UppaalQuery query : context.queries) {
-                                    final UppaalQueryRequest request = context.proxy.request(modifiedSystem, query);
+                                    final UppaalQueryRequest request = context.proxy.request(modifiedDocument, query);
                                     request.onProgress().subscribe(nil -> {
                                         if (Instant.now().isAfter(strategyDeadline)) {
-                                            throw new UppaalSystemFixerTimeoutException();
+                                            throw new UppaalDocumentFixerTimeoutException();
                                         }
                                     });
                                     final UppaalQueryResult result = request.submit();
@@ -105,7 +106,7 @@ public class UppaalSystemFixer {
                                         return false;
                                     }
                                 }
-                            } catch (final UppaalQueryException e) {
+                            } catch (final UppaalProxyException | UppaalQueryException e) {
                                 e.printStackTrace();
                                 return false;
                             }

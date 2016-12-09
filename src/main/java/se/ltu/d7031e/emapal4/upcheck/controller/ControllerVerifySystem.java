@@ -135,14 +135,22 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                 if (result.status() == UppaalQueryResult.Status.FALSE) {
                     final Duration timeout = Duration.ofSeconds(10);
                     view.addReport("#> Attempting to find valid system fixes for at most " + timeout.getSeconds() + " seconds ...");
-                    new UppaalSystemFixer(uppaalProxy, uppaalSystem, uppaalQueries)
-                            .addStrategy(new UppaalSystemFixerStrategyRemoveTransitions())
+                    new UppaalDocumentFixer(uppaalProxy, uppaalSystem, uppaalQueries)
+                            .addStrategy(new UppaalDocumentFixerStrategyRemoveEdges())
                             .setTimeout(timeout)
                             .runAsync()
-                            .then(new Promise.OnResult<UppaalSystemFixerReport>() {
+                            .then(new Promise.OnResult<UppaalDocumentFixerReport>() {
                                 @Override
-                                public void onSuccess(final UppaalSystemFixerReport fixerReport) {
-                                    view.addReport("!> " + fixerReport + "\r\n");
+                                public void onSuccess(final UppaalDocumentFixerReport fixerReport) {
+                                    if (fixerReport.isEmpty()) {
+                                        view.addReport("!> No possible fixes could be determined.\r\n");
+                                    } else {
+                                        view.addReport("!> The following changes satisfy all system queries:");
+                                        for (final UppaalDocumentFix fix : fixerReport) {
+                                            view.addReport("   - " + fix);
+                                        }
+                                        view.addReport("");
+                                    }
                                 }
 
                                 @Override

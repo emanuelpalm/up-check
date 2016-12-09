@@ -59,7 +59,7 @@ public class UppaalProxy {
      * @return object useful for interacting with UPPAAL system
      * @throws UppaalProxyException thrown if failing to resolve provided path
      */
-    public UppaalSystem loadSystemAt(final String pathString) throws Throwable {
+    public UppaalSystem loadSystemAt(final String pathString) throws UppaalProxyException {
         try {
             final PrototypeDocument prototypeDocument = new PrototypeDocument();
             final Document document = prototypeDocument.load(Paths.get(pathString).toUri().toURL());
@@ -84,9 +84,31 @@ public class UppaalProxy {
      *
      * @param system UPPAAL system to analyze
      * @param query  target query
-     * @return query result
+     * @return query request
      */
     public UppaalQueryRequest request(final UppaalSystem system, final UppaalQuery query) {
         return new UppaalQueryRequest(engine, system, query);
+    }
+
+    /**
+     * Creates new request for given UPPAAL document to be analyzed using provided query.
+     *
+     * @param document UPPAAL document to analyze
+     * @param query    target query
+     * @return query request
+     * @throws UppaalProxyException if {@code document} is invalid
+     */
+    public UppaalQueryRequest request(final Document document, final UppaalQuery query) throws UppaalProxyException {
+        try {
+            final ArrayList<Problem> problems = new ArrayList<>();
+            final UppaalSystem system = engine.getSystem(document, problems);
+            if (problems.size() > 0) {
+                throw new UppaalProxyException(UppaalProxyStatus.SYSTEM_NOT_VALID, problems.toString());
+            }
+            return request(system, query);
+
+        } catch (final EngineException e) {
+            throw new UppaalProxyException(UppaalProxyStatus.ENGINE_ERROR, e);
+        }
     }
 }
