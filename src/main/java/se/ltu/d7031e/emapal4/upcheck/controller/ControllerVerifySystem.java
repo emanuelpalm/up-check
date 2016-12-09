@@ -125,16 +125,16 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                 view.addReport("#> Query on line " + query.lineNumber() + " updated: " + query.data());
                 final UppaalSystem uppaalSystem = atomicUppaalSystem.get();
                 if (uppaalSystem == null) {
-                    view.addReport("!> No available UPPAAL system. Nothing to report.");
+                    view.addReport("!> No available UPPAAL system. Nothing to report.\r\n");
                     return;
                 }
                 final UppaalQueryRequest request = uppaalProxy.request(uppaalSystem, query);
                 final UppaalQueryResult result = request.submit();
-                view.addReport("!> Query validity: " + result.status());
+                view.addReport("!> Query validity: " + result.status() + "\r\n");
 
                 if (result.status() == UppaalQueryResult.Status.FALSE) {
                     final Duration timeout = Duration.ofSeconds(10);
-                    view.addReport("#> Attempting to find valid system fixes for " + timeout + " ...");
+                    view.addReport("#> Attempting to find valid system fixes for at most " + timeout.getSeconds() + " seconds ...");
                     new UppaalSystemFixer(uppaalProxy, uppaalSystem, uppaalQueries)
                             .addStrategy(new UppaalSystemFixerStrategyRemoveTransitions())
                             .setTimeout(timeout)
@@ -148,20 +148,17 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                                 @Override
                                 public void onFailure(final Throwable exception) {
                                     exception.printStackTrace();
-                                    view.addReport("!>" + exception.getLocalizedMessage() + "\r\n");
+                                    view.addReport("!> " + exception.getLocalizedMessage() + "\r\n");
                                 }
                             });
                 }
 
             } catch (final UppaalQueryException e) {
                 e.printStackTrace();
-                view.addReport("!> Query failed. Reason: " + e.getLocalizedMessage());
+                view.addReport("!> Query failed. Reason: " + e.getLocalizedMessage() + "\r\n");
 
             } catch (final Throwable e) {
                 view.showException(null, e);
-
-            } finally {
-                view.addReport("");
             }
         });
 
