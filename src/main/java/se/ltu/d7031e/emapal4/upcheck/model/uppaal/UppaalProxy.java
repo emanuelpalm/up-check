@@ -48,7 +48,7 @@ public class UppaalProxy {
             throw new UppaalProxyException(UppaalProxyStatus.ENGINE_INCOMPATIBLE, e);
 
         } catch (final RuntimeException | IOException | EngineException e) {
-            throw new UppaalProxyException(UppaalProxyStatus.ENGINE_NOT_CONNECTED, e);
+            throw new UppaalProxyException(UppaalProxyStatus.ENGINE_ERROR, e);
         }
     }
 

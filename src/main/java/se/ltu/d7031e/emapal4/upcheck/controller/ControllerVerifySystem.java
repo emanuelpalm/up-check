@@ -49,7 +49,7 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                         view.showException("It seems like the used UPPAAL engine isn't compatible with UpCheck.", e);
                         resetAndReboot();
                         break;
-                    case ENGINE_NOT_CONNECTED:
+                    case ENGINE_ERROR:
                         view.showException("Failed to connect to UPPAAL engine.", e.getCause());
                         break;
                     case SYSTEM_NOT_FOUND:
