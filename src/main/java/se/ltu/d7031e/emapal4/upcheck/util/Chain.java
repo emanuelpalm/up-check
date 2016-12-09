@@ -18,8 +18,8 @@ public abstract class Chain<T> implements Iterable<T> {
      * @param <T> chain link element type
      * @return empty chain
      */
+    @SuppressWarnings("unchecked")
     public static <T> Chain<T> empty() {
-        //noinspection unchecked
         return (Chain<T>) End.INSTANCE;
     }
 
