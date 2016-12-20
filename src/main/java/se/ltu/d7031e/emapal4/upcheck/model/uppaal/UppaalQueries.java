@@ -112,14 +112,18 @@ public class UppaalQueries implements Iterable<UppaalQuery> {
      */
     public void update(final String string) {
         final Set<UppaalQuery> newQueries = parseBytes(string.getBytes(CHARSET), CHARSET);
+        final ArrayList<UppaalQuery> updatedQueries = new ArrayList<>();
         synchronized (lock) {
             for (final UppaalQuery query : newQueries) {
                 if (!queries.contains(query)) {
-                    onQueryUpdated.publish(query);
+                    updatedQueries.add(query);
                 }
             }
+
             original = string;
             queries = newQueries;
+
+            updatedQueries.forEach(onQueryUpdated::publish);
         }
     }
 
