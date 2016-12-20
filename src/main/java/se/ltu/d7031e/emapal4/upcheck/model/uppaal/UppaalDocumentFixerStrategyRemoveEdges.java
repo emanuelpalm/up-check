@@ -23,18 +23,16 @@ public class UppaalDocumentFixerStrategyRemoveEdges implements UppaalDocumentFix
             if (templates == null) {
                 return Collections.emptyList();
             }
-            int x = 0, y = 0;
             // TODO: Make implementation less naive.
+            int x = 0;
             for (final Node template : Nodes.iterableOf(templates)) {
-                System.out.println(Nodes.toString(template, false));
+                int y = 0;
                 for (final Node node : Nodes.iterableOf(template.getFirst())) {
-                    System.out.println(Nodes.toString(node, false));
                     if (node instanceof Edge) {
-                        final Document clone = (Document) document.clone(); // TODO: Not behaving as expected.
+                        final Document clone = (Document) document.clone();
                         Nodes.getChildByIndexes(clone, x, y)
-                                //.orElseThrow(IllegalStateException::new)
-                                //.remove();
-                                .ifPresent(Node::remove);
+                                .orElseThrow(IllegalStateException::new)
+                                .remove();
 
                         if (predicate.test(clone)) {
                             fixes.add(UppaalDocumentFix.Remove.Of(node));
