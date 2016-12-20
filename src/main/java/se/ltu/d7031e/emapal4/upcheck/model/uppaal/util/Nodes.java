@@ -4,6 +4,8 @@ import com.uppaal.model.core2.*;
 
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Various UPPAAL {@link Node} utilities.
@@ -59,14 +61,15 @@ public class Nodes {
     }
 
     /**
-     * Creates iterable of given node, useful for iterating through all node sibling on the same hierarchy level.
+     * Creates iterable of given node, useful for iterating through all node sibling on the same hierarchy level after
+     * given start node.
      *
-     * @param first first node in linked list of nodes to iterate through
+     * @param start node in linked list of nodes to start iterating from
      * @return iterable
      */
-    public static Iterable<Node> iterableOf(final Node first) {
+    public static Iterable<Node> iterableOf(final Node start) {
         return () -> new Iterator<Node>() {
-            private Node node = first;
+            private Node node = start;
 
             @Override
             public boolean hasNext() {
@@ -92,7 +95,7 @@ public class Nodes {
      * @return node string representation
      */
     public static String toString(final Node node) {
-        return toString(node, true);
+        return toString(node, true, false);
     }
 
     /**
@@ -101,7 +104,7 @@ public class Nodes {
      * @param node node of which to get string representation
      * @return node string representation
      */
-    public static String toString(final Node node, final boolean includeParent) {
+    public static String toString(final Node node, final boolean includeParent, final boolean includeChildren) {
         final String name = (String) Optional.ofNullable(node.getProperty("name"))
                 .map(Property::getValue)
                 .orElse(null);
@@ -116,7 +119,7 @@ public class Nodes {
         } else if (node instanceof Edge) {
             final Edge edge = (Edge) node;
             type = "Edge";
-            extra = " source: " + toString(edge.getSource(), false) + " target: " + toString(edge.getTarget(), false);
+            extra = " source: " + toString(edge.getSource(), false, false) + " target: " + toString(edge.getTarget(), false, false);
 
         } else {
             type = node.getClass().getSimpleName();
@@ -125,12 +128,17 @@ public class Nodes {
 
         final String parent = includeParent ? Optional.ofNullable(node.getParent())
                 .filter(parent0 -> parent0 instanceof Node)
-                .map(parent0 -> toString((Node) parent0))
+                .map(parent0 -> toString((Node) parent0, false, false))
                 .orElse(null) : null;
+
+        final String children = includeChildren ? StreamSupport.stream(iterableOf(node.getFirst()).spliterator(), false)
+                .map(child -> toString(child, false, true))
+                .collect(Collectors.joining(" ", "[", "]")) : null;
 
         return type + "{" +
                 (name != null && name.length() > 0 ? " name: \"" + name + "\"" : "") +
                 (parent != null && parent.length() > 0 ? " parent: " + parent : "") +
+                (children != null && children.length() > 0 ? " children: " + children : "") +
                 extra +
                 " }";
     }
