@@ -7,8 +7,11 @@ import com.uppaal.model.core2.Document;
 import com.uppaal.model.core2.PrototypeDocument;
 import com.uppaal.model.system.UppaalSystem;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -62,7 +65,7 @@ public class UppaalProxy {
     public UppaalSystem loadSystemAt(final String pathString) throws UppaalProxyException {
         try {
             final PrototypeDocument prototypeDocument = new PrototypeDocument();
-            final Document document = prototypeDocument.load(Paths.get(pathString).toUri().toURL());
+            final Document document = prototypeDocument.load(new URL("file", null, pathString));
 
             final ArrayList<Problem> problems = new ArrayList<>();
             final UppaalSystem uppaalSystem = engine.getSystem(document, problems);
@@ -71,7 +74,7 @@ public class UppaalProxy {
             }
             return uppaalSystem;
 
-        } catch (final MalformedURLException e) {
+        } catch (final MalformedURLException | FileNotFoundException e) {
             throw new UppaalProxyException(UppaalProxyStatus.SYSTEM_NOT_FOUND, e);
 
         } catch (final Throwable e) {
