@@ -5,6 +5,7 @@ import com.uppaal.model.core2.Node;
 import se.ltu.d7031e.emapal4.upcheck.model.uppaal.util.Nodes;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -51,6 +52,19 @@ public abstract class UppaalDocumentFix {
 
         private Remove(final Node node) {
             this.node = node;
+        }
+
+        /**
+         * Creates new node removal fix of given list of nodes.
+         *
+         * @param nodes nodes to remove
+         * @return created fix object
+         */
+        static UppaalDocumentFix Of(final List<Node> nodes) {
+            return And.Of(nodes.stream()
+                    .map(Remove::Of)
+                    .collect(Collectors.toList())
+                    .toArray(new UppaalDocumentFix[nodes.size()]));
         }
 
         /**
