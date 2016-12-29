@@ -5,6 +5,7 @@ import com.uppaal.model.core2.Document;
 import com.uppaal.model.core2.Edge;
 import com.uppaal.model.core2.Node;
 import se.ltu.d7031e.emapal4.upcheck.model.uppaal.util.Nodes;
+import se.ltu.d7031e.emapal4.upcheck.util.Combinatorics;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,31 +24,52 @@ public class UppaalDocumentFixerStrategyRemoveEdges implements UppaalDocumentFix
             if (templates == null) {
                 return Collections.emptyList();
             }
-            // TODO: Make implementation less naive.
-            int x = 0;
-            for (final Node template : Nodes.iterableOf(templates)) {
-                int y = 0;
-                for (final Node node : Nodes.iterableOf(template.getFirst())) {
-                    if (node instanceof Edge) {
-                        final Document clone = (Document) document.clone();
-                        Nodes.getChildByIndexes(clone, x, y)
-                                .orElseThrow(IllegalStateException::new)
-                                .remove();
-
-                        if (predicate.test(clone)) {
-                            fixes.add(UppaalDocumentFix.Remove.Of(node));
+            final ArrayList<NodePath> nodePaths = new ArrayList<>();
+            {
+                int offsetTemplate = 0;
+                for (final Node template : Nodes.iterableOf(templates)) {
+                    int offsetTemplateChild = 0;
+                    for (final Node node : Nodes.iterableOf(template.getFirst())) {
+                        if (node instanceof Edge) {
+                            nodePaths.add(new NodePath(offsetTemplate, offsetTemplateChild));
                         }
+                        offsetTemplateChild++;
                     }
-                    y++;
+                    offsetTemplate++;
                 }
-                x++;
             }
-        } catch (final CloneNotSupportedException e) {
-            throw new IllegalStateException(e);
+            Combinatorics.combinations(nodePaths, nodePathCombination -> {
+                try {
+                    final Document clone = (Document) document.clone();
 
+                    final ArrayList<Node> nodes = new ArrayList<>(nodePathCombination.size());
+                    nodePathCombination.forEach(nodePath -> nodes.add(Nodes.getChildByIndexes(clone, nodePath.offsetTemplate, nodePath.offsetTemplateChild)
+                            .orElseThrow(IllegalStateException::new)));
+                    nodes.forEach(Node::remove);
+
+                    if (predicate.test(clone)) {
+                        fixes.add(UppaalDocumentFix.Remove.Of(nodes));
+                    }
+                } catch (final CloneNotSupportedException e) {
+                    throw new IllegalStateException(e);
+                }
+            });
         } catch (final UppaalDocumentFixerTimeoutException e) {
             e.printStackTrace();
         }
         return fixes;
+    }
+
+    /**
+     * Represents the relative path to some node.
+     */
+    private static class NodePath {
+        private final int offsetTemplate;
+        private final int offsetTemplateChild;
+
+        NodePath(final int offsetTemplate, final int offsetTemplateChild) {
+            this.offsetTemplate = offsetTemplate;
+            this.offsetTemplateChild = offsetTemplateChild;
+        }
     }
 }
