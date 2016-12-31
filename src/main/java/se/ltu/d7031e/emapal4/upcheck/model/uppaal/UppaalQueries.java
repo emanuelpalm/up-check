@@ -25,7 +25,7 @@ public class UppaalQueries implements Iterable<UppaalQuery> {
     private static final Predicate<String> IS_COMMENT_LINE = Pattern.compile("\\s*//.*").asPredicate();
     private static final Charset CHARSET = StandardCharsets.UTF_8;
 
-    private final EventBroker<UppaalQuery> onQueryUpdated = new EventBroker<>();
+    private final EventBroker<UppaalQueries> onUpdated = new EventBroker<>();
     private final Object lock = new Object();
 
     private String original;
@@ -93,37 +93,16 @@ public class UppaalQueries implements Iterable<UppaalQuery> {
     }
 
     /**
-     * Clears all contained queries.
-     */
-    public void clear() {
-        synchronized (lock) {
-            original = "";
-            queries.clear();
-        }
-    }
-
-    /**
      * Replaces the current set of queries with those found in the given string.
-     * <p>
-     * Any differences between the given set of queries and the current set of queries are published via {@link
-     * #onQueryUpdated()}.
      *
      * @param string string of queries to read
      */
     public void update(final String string) {
         final Set<UppaalQuery> newQueries = parseBytes(string.getBytes(CHARSET), CHARSET);
-        final ArrayList<UppaalQuery> updatedQueries = new ArrayList<>();
         synchronized (lock) {
-            for (final UppaalQuery query : newQueries) {
-                if (!queries.contains(query)) {
-                    updatedQueries.add(query);
-                }
-            }
-
             original = string;
             queries = newQueries;
-
-            updatedQueries.forEach(onQueryUpdated::publish);
+            onUpdated.publish(this);
         }
     }
 
@@ -135,8 +114,8 @@ public class UppaalQueries implements Iterable<UppaalQuery> {
      *
      * @return query update event publisher
      */
-    public EventPublisher<UppaalQuery> onQueryUpdated() {
-        return onQueryUpdated;
+    public EventPublisher<UppaalQueries> onUpdated() {
+        return onUpdated;
     }
 
     @Override

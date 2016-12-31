@@ -52,4 +52,9 @@ public class UppaalQuery {
     public int hashCode() {
         return data.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "`" + data() + "` (:" + lineNumber() + ")";
+    }
 }

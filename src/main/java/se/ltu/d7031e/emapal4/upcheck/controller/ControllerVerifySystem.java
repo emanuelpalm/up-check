@@ -13,6 +13,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -109,61 +111,69 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                 view.showException(null, e);
             }
         };
-        final Consumer<Void> clearReport = nil -> uppaalQueries.clear();
-        final Consumer<ViewVerifySystem.Queries> generateReport = queries -> uppaalQueries.update(queries.data());
+        final Consumer<ViewVerifySystem.Queries> generateReport = queries -> {
+            view.addReport("=> Generating new UPPAAL report ...\r\n");
+            uppaalQueries.update(queries.data());
+        };
         final Consumer<Void> reselectUppaalInstallationFolder = nil -> resetAndReboot();
 
         view.onSystemPath().subscribe(setSystemPath);
         view.onQueriesPath().subscribe(setQueriesPath);
         view.onQueriesSave().subscribe(saveQueries);
-        view.onReportCleared().subscribe(clearReport);
         view.onReportRequest().subscribe(generateReport);
         view.onMenuUppaalSelectInstallation().subscribe(reselectUppaalInstallationFolder);
 
-        uppaalQueries.onQueryUpdated().subscribe(query -> {
+        final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        uppaalQueries.onUpdated().subscribe(queries -> {
             try {
-                view.addReport("#> Query on line " + query.lineNumber() + " updated: " + query.data());
                 final UppaalSystem uppaalSystem = atomicUppaalSystem.get();
                 if (uppaalSystem == null) {
                     view.addReport("!> No available UPPAAL system. Nothing to report.\r\n");
                     return;
                 }
-                final UppaalQueryRequest request = uppaalProxy.request(uppaalSystem, query);
-                final UppaalQueryResult result = request.submit();
-                view.addReport("!> Query validity: " + result.status() + "\r\n");
-
-                if (result.status() == UppaalQueryResult.Status.FALSE) {
-                    final Duration timeout = Duration.ofSeconds(10);
-                    view.addReport("#> Attempting to find valid system fixes for at most " + timeout.getSeconds() + " seconds ...");
-                    new UppaalDocumentFixer(uppaalProxy, uppaalSystem, uppaalQueries)
-                            .addStrategy(new UppaalDocumentFixerStrategyRemoveEdges())
-                            .setTimeout(timeout)
-                            .runAsync()
-                            .then(new Promise.OnResult<UppaalDocumentFixerReport>() {
-                                @Override
-                                public void onSuccess(final UppaalDocumentFixerReport fixerReport) {
-                                    if (fixerReport.isEmpty()) {
-                                        view.addReport("!> No possible fixes could be determined.\r\n");
-                                    } else {
-                                        view.addReport("!> The following changes satisfy all system queries:");
-                                        for (final UppaalDocumentFix fix : fixerReport) {
-                                            view.addReport("   - " + fix);
-                                        }
-                                        view.addReport("");
-                                    }
-                                }
-
-                                @Override
-                                public void onFailure(final Throwable exception) {
-                                    exception.printStackTrace();
-                                    view.addReport("!> " + exception.getLocalizedMessage() + "\r\n");
-                                }
-                            });
+                boolean isSuggestingFixes = false;
+                for (final UppaalQuery query : queries) {
+                    final UppaalQueryRequest request = uppaalProxy.request(uppaalSystem, query);
+                    final UppaalQueryResult result = request.submit();
+                    final UppaalQueryResult.Status status = result.status();
+                    if (status == UppaalQueryResult.Status.FALSE) {
+                        isSuggestingFixes = true;
+                    }
+                    view.addReport("#> Executing: " + query + "\r\n   Result: " + status + "\r\n");
                 }
+                if (!isSuggestingFixes) {
+                    view.addReport("!> All queries satisfied.\r\n");
+                    return;
+                }
+                final Duration timeout = Duration.ofSeconds(10);
+                view.addReport("#> Attempting to find valid system fixes for at most " + timeout.getSeconds() + " seconds ...");
+                new UppaalDocumentFixer(uppaalProxy, uppaalSystem, uppaalQueries)
+                        .addStrategy(new UppaalDocumentFixerStrategyRemoveEdges())
+                        .setTimeout(timeout)
+                        .execute(executorService)
+                        .then(new Promise.OnResult<UppaalDocumentFixerReport>() {
+                            @Override
+                            public void onSuccess(final UppaalDocumentFixerReport fixerReport) {
+                                if (fixerReport.isEmpty()) {
+                                    view.addReport("!> No possible fixes could be determined.\r\n");
+                                } else {
+                                    view.addReport("!> The following changes satisfy all system queries:");
+                                    for (final UppaalDocumentFix fix : fixerReport) {
+                                        view.addReport("   -> " + fix);
+                                    }
+                                    view.addReport("");
+                                }
+                            }
 
+                            @Override
+                            public void onFailure(final Throwable exception) {
+                                exception.printStackTrace();
+                                view.addReport("!> " + exception.getLocalizedMessage() + "\r\n");
+                            }
+                        });
             } catch (final UppaalQueryException e) {
                 e.printStackTrace();
-                view.addReport("!> Query failed. Reason: " + e.getLocalizedMessage() + "\r\n");
+                view.addReport("!> Report generation failed. Reason: " + e.getLocalizedMessage() + "\r\n");
 
             } catch (final Throwable e) {
                 view.showException(null, e);

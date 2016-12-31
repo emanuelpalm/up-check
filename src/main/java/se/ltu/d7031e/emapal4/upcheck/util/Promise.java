@@ -1,11 +1,14 @@
 package se.ltu.d7031e.emapal4.upcheck.util;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * A promise that some value will become available at some point in the future.
  *
  * @param <V> type of successful result
  */
 public class Promise<V> {
+    private final AtomicBoolean isExecuted = new AtomicBoolean(false);
     private final Task<V> task;
 
     /**
@@ -24,13 +27,16 @@ public class Promise<V> {
      * @return promise cancellation object
      */
     public Canceller then(final OnResult<V> onResult) {
-        try {
-            task.execute(onResult);
+        if (isExecuted.compareAndSet(false, true)) {
+            try {
+                task.execute(onResult);
 
-        } catch (final Throwable exception) {
-            onResult.onFailure(exception);
+            } catch (final Throwable exception) {
+                onResult.onFailure(exception);
+            }
+            return task::abort;
         }
-        return task::abort;
+        throw new IllegalStateException("Promise already executed.");
     }
 
     /**
@@ -44,14 +50,13 @@ public class Promise<V> {
          * Executes task.
          *
          * @param onResult handler to receive task result
-         * @throws Throwable any exception thrown during task execution
          */
-        void execute(final OnResult<V> onResult) throws Throwable;
+        void execute(final OnResult<V> onResult);
 
         /**
          * Aborts task, if the operation is supported.
          */
-        default void abort() throws InterruptedException {
+        default void abort() {
             throw new IllegalStateException("Task abortion not supported.");
         }
     }
@@ -91,6 +96,6 @@ public class Promise<V> {
          *
          * @throws IllegalStateException if aborting is not supported by cancelled promise
          */
-        void cancel() throws InterruptedException;
+        void cancel();
     }
 }

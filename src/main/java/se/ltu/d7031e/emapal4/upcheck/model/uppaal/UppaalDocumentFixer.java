@@ -8,7 +8,10 @@ import se.ltu.d7031e.emapal4.upcheck.util.Promise;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * UPPAAL {@link Document} fix suggester.
@@ -57,34 +60,32 @@ public class UppaalDocumentFixer {
      *
      * @param timeout timeout duration
      * @return updated UPPAAL system fixer object
-     * @see #runAsync()
+     * @see #execute(ExecutorService)
      */
     public UppaalDocumentFixer setTimeout(final Duration timeout) {
         return new UppaalDocumentFixer(context, timeout, strategies);
     }
 
     /**
-     * Starts evaluating strategies in new thread, returning promise of eventual result.
+     * Starts evaluating strategies using provided {@code executorService}, returning promise of eventual result.
      * <p>
-     * The thread will never run longer than any duration set using {@link #setTimeout(Duration)}. In case of
-     * employing multiple {@link UppaalDocumentFixerStrategy} objects, each is given an equal share of the time to
-     * execute.
+     * Evaluation will never run longer than a duration set using {@link #setTimeout(Duration)}. In case of employing
+     * multiple {@link UppaalDocumentFixerStrategy} objects, each is given an equal share of the time to execute.
      *
+     * @param executorService evaluation executor service
      * @return promise of an eventual report
      */
-    public Promise<UppaalDocumentFixerReport> runAsync() {
+    public Promise<UppaalDocumentFixerReport> execute(final ExecutorService executorService) {
         return new Promise<>(new Promise.Task<UppaalDocumentFixerReport>() {
             private final AtomicBoolean isAborted = new AtomicBoolean(false);
-            private final Object lock = this;
-
-            private Thread thread = null;
+            private final AtomicReference<Future<?>> atomicFuture = new AtomicReference<>();
 
             @Override
-            public void execute(final Promise.OnResult<UppaalDocumentFixerReport> onResult) throws Throwable {
+            public void execute(final Promise.OnResult<UppaalDocumentFixerReport> onResult) {
                 if (isAborted.get()) {
                     return;
                 }
-                final Runnable runnable = () -> {
+                atomicFuture.set(executorService.submit(() -> {
                     final UppaalDocumentFixerReport report = new UppaalDocumentFixerReport();
                     final Duration strategyTimeout = timeout.dividedBy(strategies.size());
                     for (final UppaalDocumentFixerStrategy strategy : strategies) {
@@ -115,23 +116,15 @@ public class UppaalDocumentFixer {
                         report.add(modifications);
                     }
                     onResult.onSuccess(report);
-                };
-                synchronized (lock) {
-                    thread = new Thread(runnable);
-                    thread.setPriority(Thread.MIN_PRIORITY);
-                    thread.setDaemon(true);
-                    thread.run();
-                }
+                }));
             }
 
             @Override
-            public void abort() throws InterruptedException {
+            public void abort() {
                 if (isAborted.compareAndSet(false, true)) {
-                    synchronized (lock) {
-                        if (thread != null) {
-                            thread.join();
-                            thread = null;
-                        }
+                    final Future<?> future = atomicFuture.get();
+                    if (future != null) {
+                        future.cancel(true);
                     }
                 }
             }

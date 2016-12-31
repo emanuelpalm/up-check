@@ -208,16 +208,8 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                             setEnabled(false);
                             setFocusPainted(false);
                             addActionListener(evt -> {
-                                final int option = JOptionPane.showConfirmDialog(
-                                        root,
-                                        "Note that this will remove the current system report.",
-                                        "Confirm report clearing",
-                                        JOptionPane.OK_CANCEL_OPTION,
-                                        JOptionPane.WARNING_MESSAGE);
-                                if (option == JOptionPane.OK_OPTION) {
-                                    textAreaReport.setText("");
-                                    onReportClear.publish(null);
-                                }
+                                textAreaReport.setText("");
+                                onReportClear.publish(null);
                             });
                         }});
                     }});
