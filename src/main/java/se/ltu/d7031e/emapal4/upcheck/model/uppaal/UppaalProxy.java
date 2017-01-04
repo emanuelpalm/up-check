@@ -76,6 +76,9 @@ public class UppaalProxy {
             throw new UppaalProxyException(UppaalProxyStatus.SYSTEM_NOT_FOUND, e);
 
         } catch (final Throwable e) {
+            if (e instanceof UppaalProxyException) {
+                throw (UppaalProxyException) e;
+            }
             throw new UppaalProxyException(UppaalProxyStatus.ENGINE_INCOMPATIBLE, e);
         }
     }
