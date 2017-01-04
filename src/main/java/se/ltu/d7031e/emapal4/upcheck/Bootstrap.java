@@ -11,6 +11,8 @@ import se.ltu.d7031e.emapal4.upcheck.view.Renderer;
 import se.ltu.d7031e.emapal4.upcheck.view.Renderers;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -41,9 +43,9 @@ public final class Bootstrap {
                 uppaalFolder = showLocateUppaal();
             }
             System.out.println("Using UPPAAL installation at: " + uppaalFolder);
-            status = JavaProcess.exec(Main.class,
-                    uppaalFolder.uppaalJar().toString(),
-                    uppaalFolder.libModelJar().toString());
+            status = JavaProcess.exec(Main.class, Arrays.stream(uppaalFolder.jars())
+                    .map(Path::toString)
+                    .toArray(String[]::new));
 
         } while (status == Main.EXIT_STATUS_REBOOT);
 

@@ -2,18 +2,21 @@ package se.ltu.d7031e.emapal4.upcheck.model.uppaal;
 
 import se.ltu.d7031e.emapal4.upcheck.util.Os;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 /**
  * Represents a local UPPAAL installation folder.
  */
 public class UppaalFolder {
     private final Path binServerExe;
-    private final Path libModelJar;
+    private final Path[] jars;
     private final Path root;
-    private final Path uppaalJar;
 
     private UppaalFolder(final Path root) {
         this.root = root;
@@ -34,38 +37,15 @@ public class UppaalFolder {
                 return root.resolve("bin-Win32\\server.exe");
             }
         }.create();
-        libModelJar = new Os.Factory<Path>() {
-            @Override
-            public Path createOnLinux() {
-                return root.resolve("lib/model.jar");
-            }
+        try {
+            jars = Files.find(root, 16, (path, attributes) -> {
+                final String name = path.getFileName().toString();
+                return name.endsWith(".jar") && !name.contains("-javadoc") && !name.contains("-source");
+            }).toArray(Path[]::new);
 
-            @Override
-            public Path createOnMacOsX() {
-                return root.resolve("Contents/Java/model.jar");
-            }
-
-            @Override
-            public Path createOnWindows() {
-                return root.resolve("lib\\model.jar");
-            }
-        }.create();
-        uppaalJar = new Os.Factory<Path>() {
-            @Override
-            public Path createOnLinux() {
-                return root.resolve("uppaal.jar");
-            }
-
-            @Override
-            public Path createOnMacOsX() {
-                return root.resolve("Contents/Java/uppaal.jar");
-            }
-
-            @Override
-            public Path createOnWindows() {
-                return root.resolve("uppaal.jar");
-            }
-        }.create();
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
@@ -91,9 +71,8 @@ public class UppaalFolder {
     }
 
     private boolean containsRequiredFiles() {
-        return Files.exists(binServerExe())
-                && Files.exists(libModelJar())
-                && Files.exists(uppaalJar());
+        return Stream.concat(Stream.of(binServerExe()), Arrays.stream(jars))
+                .allMatch(Files::exists);
     }
 
     /**
@@ -120,17 +99,10 @@ public class UppaalFolder {
     }
 
     /**
-     * Path to model JAR archive.
+     * Path to UPPAAL JAR archives.
      */
-    public Path libModelJar() {
-        return libModelJar;
-    }
-
-    /**
-     * Path to UPPAAL base JAR archive.
-     */
-    public Path uppaalJar() {
-        return uppaalJar;
+    public Path[] jars() {
+        return jars;
     }
 
     @Override
