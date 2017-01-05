@@ -8,7 +8,7 @@ import se.ltu.d7031e.emapal4.upcheck.view.View;
 interface Controller<V extends View> {
     /**
      * Registers given {@link View}.
-     *
+     * <p>
      * The method provides opportunity for this object to listen for relevant {@link View} events, as well as save the
      * {@link View} reference in order to use it to push GUI changes later on.
      *
