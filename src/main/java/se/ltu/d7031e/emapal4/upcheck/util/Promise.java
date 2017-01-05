@@ -1,9 +1,12 @@
 package se.ltu.d7031e.emapal4.upcheck.util;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * A promise that some value will become available at some point in the future.
@@ -95,6 +98,155 @@ public class Promise<V> {
             return task::cancel;
         }
         throw new IllegalStateException("Promise already executed.");
+    }
+
+    /**
+     * Registers another promise to be executed after this one finishes.
+     * <p>
+     * The result of this promise is ignored if successful. Exceptions are propagated as usual.
+     *
+     * @param promise promise to be executed after this
+     * @param <W>     provided promise result type
+     * @return new promise
+     */
+    public <W> Promise<W> thenAwait(final Promise<W> promise) {
+        Objects.requireNonNull(promise);
+        return new Promise<>(new Task<W>() {
+            @Override
+            public void execute(final OnResult<W> onResult) {
+                then(new OnResult<V>() {
+                    @Override
+                    public void onSuccess(final V value) {
+                        promise.then(onResult);
+                    }
+
+                    @Override
+                    public void onFailure(final Throwable exception) {
+                        onResult.onFailure(exception);
+                    }
+                });
+            }
+
+            @Override
+            public void cancel() {
+                task.cancel();
+                promise.task.cancel();
+            }
+        });
+    }
+
+    /**
+     * Registers promise result filter.
+     * <p>
+     * If this promise is successfully evaluated, then the returned promise is provided only if it satisfies provided
+     * predicate function.
+     *
+     * @param predicate determines if some promise result is satisfied
+     * @return new promise
+     */
+    public Promise<Optional<V>> thenFilter(final Predicate<V> predicate) {
+        Objects.requireNonNull(predicate);
+        return new Promise<>(new Task<Optional<V>>() {
+            @Override
+            public void execute(final OnResult<Optional<V>> onResult) {
+                then(new OnResult<V>() {
+                    @Override
+                    public void onSuccess(final V value) {
+                        onResult.onSuccess(predicate.test(value) ? Optional.of(value) : Optional.empty());
+                    }
+
+                    @Override
+                    public void onFailure(final Throwable exception) {
+                        onResult.onFailure(exception);
+                    }
+                });
+            }
+
+            @Override
+            public void cancel() {
+                task.cancel();
+            }
+        });
+    }
+
+    /**
+     * Registers flattened promise result transformer.
+     * <p>
+     * If this promise is successfully evaluated, then the result is mapped to the provided transformation function.
+     * The return value of that transformation function is then unwrapped and provided to the returned promise.
+     *
+     * @param transformer function transforming successful promise result
+     * @param <W>         transformer return type
+     * @return new promise
+     */
+    public <W> Promise<W> thenFlatMap(final Function<V, Promise<W>> transformer) {
+        Objects.requireNonNull(transformer);
+        return new Promise<>(new Task<W>() {
+            @Override
+            public void execute(final OnResult<W> onResult) {
+                then(new OnResult<V>() {
+                    @Override
+                    public void onSuccess(final V value) {
+                        final Promise<W> promise = transformer.apply(value);
+                        promise.then(new OnResult<W>() {
+                            @Override
+                            public void onSuccess(final W value) {
+                                onResult.onSuccess(value);
+                            }
+
+                            @Override
+                            public void onFailure(final Throwable exception) {
+                                onResult.onFailure(exception);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(final Throwable exception) {
+                        onResult.onFailure(exception);
+                    }
+                });
+            }
+
+            @Override
+            public void cancel() {
+                task.cancel();
+            }
+        });
+    }
+
+    /**
+     * Registers promise result transformer.
+     * <p>
+     * If this promise is successfully evaluated, then the result is mapped to the provided transformation function.
+     *
+     * @param transformer function transforming successful promise result
+     * @param <W>         transformer return type
+     * @return new promise
+     */
+    public <W> Promise<W> thenMap(final Function<V, W> transformer) {
+        Objects.requireNonNull(transformer);
+        return new Promise<>(new Task<W>() {
+            @Override
+            public void execute(final OnResult<W> onResult) {
+                then(new OnResult<V>() {
+                    @Override
+                    public void onSuccess(final V value) {
+                        onResult.onSuccess(transformer.apply(value));
+                    }
+
+                    @Override
+                    public void onFailure(final Throwable exception) {
+                        onResult.onFailure(exception);
+                    }
+                });
+            }
+
+            @Override
+            public void cancel() {
+                task.cancel();
+            }
+        });
     }
 
     /**
