@@ -19,6 +19,8 @@ import java.util.concurrent.TimeUnit;
  * The application requires files from a local UPPAAL installation to be available on the classpath. This is achieved
  * via the {@link Bootstrap} class, containing its own main method used to help a user to locate the mentioned UPPAAL
  * folder.
+ *
+ * @see Bootstrap
  */
 public final class Main {
     /**

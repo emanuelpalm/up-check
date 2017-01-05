@@ -8,16 +8,22 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Various {@code Promise} utilities.
+ *
+ * @see Promise
  */
 public class Promises {
     private Promises() {}
 
     /**
-     * Awaits for all given promises to complete successfully, and then yields their results in a list.
+     * Waits for all given promises to complete successfully, and then yields their results in a list.
      * <p>
      * The yielded list of results correspond in order with the provided list of promises.
      * <p>
      * If any one of the given promises would fail, the returned promise is failed with only that exception.
+     * <p>
+     * Not that the provided promises are only executed in parallel if their tasks are all executed on different
+     * threads. If executed on the current thread, or if a single-threaded executor is used, all promises are executed
+     * in-order.
      *
      * @param promises promises to await
      * @param <V>      promise result type
@@ -25,7 +31,7 @@ public class Promises {
      */
     public static <V> Promise<List<V>> await(final List<Promise<V>> promises) {
         final AtomicBoolean isDone = new AtomicBoolean(false);
-        final AtomicReference<ArrayList<Promise.Canceller>> atomicCancellers = new AtomicReference<>(new ArrayList<>(promises.size()));
+        final AtomicReference<ArrayList<Promise.Receipt>> atomicCancellers = new AtomicReference<>(new ArrayList<>(promises.size()));
 
         return new Promise<>(new Promise.Task<List<V>>() {
             @Override
@@ -34,9 +40,9 @@ public class Promises {
                 for (int i = promises.size(); i-- != 0; ) {
                     results.add(null);
                 }
-                final ArrayList<Promise.Canceller> cancellers = new ArrayList<>(promises.size());
+                final ArrayList<Promise.Receipt> receipts = new ArrayList<>(promises.size());
                 for (int i = promises.size(); i-- != 0; ) {
-                    cancellers.add(null);
+                    receipts.add(null);
                 }
                 final AtomicInteger promiseCounter = new AtomicInteger(promises.size());
                 int promiseIndex = 0;
@@ -47,7 +53,7 @@ public class Promises {
                         return;
                     }
 
-                    cancellers.set(index, promise.then(new Promise.OnResult<V>() {
+                    receipts.set(index, promise.then(new Promise.OnResult<V>() {
                         @Override
                         public void onSuccess(final V value) {
                             if (isDone.get()) {
@@ -70,15 +76,15 @@ public class Promises {
                         }
                     }));
                 }
-                atomicCancellers.set(cancellers);
+                atomicCancellers.set(receipts);
             }
 
             @Override
             public void cancel() {
                 if (isDone.compareAndSet(false, true)) {
-                    final ArrayList<Promise.Canceller> cancellers = atomicCancellers.get();
-                    if (cancellers != null) {
-                        cancellers.forEach(Promise.Canceller::cancel);
+                    final ArrayList<Promise.Receipt> receipts = atomicCancellers.get();
+                    if (receipts != null) {
+                        receipts.forEach(Promise.Receipt::cancel);
                     }
                 }
             }

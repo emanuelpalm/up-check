@@ -5,6 +5,12 @@ import java.util.function.Consumer;
 
 /**
  * Manages the publishing of events to registered subscribers.
+ * <p>
+ * The publish-subscribe pattern effectively decouples senders of events (publishers) from consumers of events
+ * (subscribers).
+ *
+ * @see EventPublisher
+ * @see EventSubscription
  */
 public class EventBroker<Event> implements EventPublisher<Event> {
     private ArrayList<Consumer<Event>> subscribers;

@@ -21,4 +21,22 @@ In order to be able to interact with UPPAAL systems, the application needs to co
 
 This means that in order for UpCheck to be fully functional, you need to [download](http://www.uppaal.org/download.shtml) and install UPPAAL 4.1+ on your development machine, copy the `model.jar` ([javadoc](http://people.cs.aau.dk/~marius/modeldoc/)) file from the UPPAAL application folder into [lib/uppaal/](lib/uppaal/), being relative to the folder in which this document is located.
 
-When the UpCheck application boots up for the first time, it will prompt you for the location of a local UPPAAL installation. If correctly provided, the application will seamlessly launch a new Java process with a `classpath` modified to include required proprietary Java libraries. This way no proprietary files need to be part of the UpCheck application. 
+When the UpCheck application boots up for the first time, it will prompt you for the location of a local UPPAAL installation. If correctly provided, the application will seamlessly launch a new Java process with a `classpath` modified to include required proprietary Java libraries. This way no proprietary files need to be part of the UpCheck application.
+
+## Application Architecture
+
+The application is loosely built around the Model-View-Controller (MVC) pattern, uses Publish-Subscribe for event propagation, and promises for asynchronous task management. Worthy of special mention is also the bootstrapping procedure used to populate the Java classpath with UPPAAL JARs. More can be read about these topics via the below links.
+
+| Topic                       | Description                                  |
+|:----------------------------|:---------------------------------------------|
+| [MVC][mvc]                  | General division of application concerns.    |
+| [Publish-Subscribe][pubsub] | System for distributing event notifications. |
+| [Promises][promises]        | Helps manage asynchronous task execution.    |
+| [Bootstrapping][boot]       | The process of loading required UPPAAL JARs. |
+
+[mvc]: docs/MVC.md
+[pubsub]: src/main/java/se/ltu/dcc/upcheck/util/EventBroker.java
+[promises]: src/main/java/se/ltu/dcc/upcheck/util/Promise.java
+[boot]: src/main/java/se/ltu/dcc/upcheck/Bootstrap.java
+
+Most classes should be properly documented. In case of questions, write an issue on GitHub.

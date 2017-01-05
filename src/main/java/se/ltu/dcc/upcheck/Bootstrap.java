@@ -19,8 +19,17 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Application bootstrapping.
  * <p>
- * Resolving a classpath containing external dependencies and then starts the regular {@link Main} function in a new
+ * Resolves a classpath containing external dependencies and then starts the regular {@link Main} function in a new OS
  * process.
+ * <p>
+ * <i>Note to developers.</i> In case of debugging, the use of this class to start the application is not recommended,
+ * this as it starts the actual application in another process that becomes unavailable to the Java debugger. Rather,
+ * start the application with this class once, so that necessary configuration files can be generated, and then close
+ * the application and start it again with the {@link Main} class. It might be necessary to complement the Java
+ * classpath if starting directly via {@link Main}. Check the STDOUT printout from running this class in order to know
+ * what to add to the classpath. The command used to start the new Java process should be available there.
+ *
+ * @see Main
  */
 public final class Bootstrap {
     /**

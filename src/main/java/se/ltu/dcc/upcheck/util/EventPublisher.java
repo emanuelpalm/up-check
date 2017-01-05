@@ -4,6 +4,9 @@ import java.util.function.Consumer;
 
 /**
  * Publishes event to registered subscribers.
+ *
+ * @see EventBroker
+ * @see EventSubscription
  */
 public interface EventPublisher<Event> {
     /**

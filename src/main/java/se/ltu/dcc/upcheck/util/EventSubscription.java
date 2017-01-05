@@ -5,6 +5,9 @@ import java.io.IOException;
 
 /**
  * An {@link EventPublisher} subscription.
+ *
+ * @see EventBroker
+ * @see EventPublisher
  */
 @FunctionalInterface
 public interface EventSubscription extends Closeable {

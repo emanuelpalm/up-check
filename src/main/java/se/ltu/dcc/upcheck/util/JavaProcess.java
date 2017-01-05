@@ -23,6 +23,8 @@ public final class JavaProcess {
         final String classpath0 = System.getProperty("java.class.path") + (classpath.length > 0
                 ? ":" + String.join(":", classpath)
                 : "");
+
+        System.out.println("Executing: " + javaBin + " -cp " + classpath0 + " " + clazz.getCanonicalName());
         return new ProcessBuilder(javaBin, "-cp", classpath0, clazz.getCanonicalName())
                 .inheritIO()
                 .start()

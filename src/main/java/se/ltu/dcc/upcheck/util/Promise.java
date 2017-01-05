@@ -2,16 +2,39 @@ package se.ltu.dcc.upcheck.util;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * A promise that some value will become available at some point in the future.
+ * <p>
+ * Each {@link Promise} instance acts as a proxy for some result that will be available at some later point. The result
+ * becomes available after the evaluation of some {@link Promise.Task}, provided to the promise instance when created.
+ * <p>
+ * Promises are <i>lazy</i>, which means that they are not executed until their contents are requested. If never {@link
+ * #then(OnResult)} or {@link #await()} is called on a given promise, the promise is never executed. These methods are
+ * referred to as the promise consumer methods.
+ * <p>
+ * Promises may only be executed once. Executing a promise a second time will cause an {@link IllegalStateException} to
+ * be thrown.
+ * <p>
+ * The {@link Promise} class takes no responsibility for which thread its task is executed on. This means that if no
+ * {@link Thread}, {@link Executor} or other means is used to evaluate the promise task asynchronously, the promise task
+ * is executed on the same thread its contents are requested on (via a consumer method).
+ * <p>
+ * Promises may be chained together using the stream-like operators provided via the {@link Promise} class. These fill a
+ * role similar to Java 8 {@link Stream} operators. Some examples are {@link #thenFilter(Predicate)} and {@link
+ * #thenMap(Function)}. Note that calling a stream-like promise operator just yields another lazy promise. No promise
+ * tasks are executed until a consumer method is called.
  *
  * @param <V> type of successful result
+ * @see <a href="https://en.wikipedia.org/wiki/Futures_and_promises">Wikipedia - Futures and Promises</a>
+ * @see Promises
  */
 public class Promise<V> {
     private final AtomicBoolean isExecuted = new AtomicBoolean(false);
@@ -48,10 +71,12 @@ public class Promise<V> {
     }
 
     /**
-     * Awaits promise result, blocking current thread until it becomes available.
+     * Registers result handle that immediately awaits promise result, blocking current thread until it becomes
+     * available.
      *
      * @return if successful, promise result
-     * @throws Throwable if unsuccessful, promise exception
+     * @throws Throwable             if unsuccessful, promise exception
+     * @throws IllegalStateException if result handler has already been registered previously
      */
     public V await() throws Throwable {
         final Semaphore semaphore = new Semaphore(0);
@@ -84,9 +109,10 @@ public class Promise<V> {
      * Registers result handler.
      *
      * @param onResult handler to receive promise result
-     * @return promise cancellation object
+     * @return promise receipt
+     * @throws IllegalStateException if result handler has already been registered previously
      */
-    public Canceller then(final OnResult<V> onResult) {
+    public Receipt then(final OnResult<V> onResult) {
         Objects.requireNonNull(onResult);
         if (isExecuted.compareAndSet(false, true)) {
             try {
@@ -250,7 +276,7 @@ public class Promise<V> {
     }
 
     /**
-     * A promise task, potentially executed asynchronously.
+     * A promise task.
      *
      * @param <V> type of successful result
      */
@@ -258,6 +284,9 @@ public class Promise<V> {
     public interface Task<V> {
         /**
          * Executes task.
+         * <p>
+         * If asynchronous task execution is desired, then the implementation of this method ought to make sure that
+         * execution is performed on another thread.
          *
          * @param onResult handler to receive task result
          */
@@ -300,7 +329,7 @@ public class Promise<V> {
      * Used to cancel some running {@link Task}.
      */
     @FunctionalInterface
-    public interface Canceller {
+    public interface Receipt {
         /**
          * Signals desire for promise to never be resolved.
          *
@@ -311,10 +340,10 @@ public class Promise<V> {
         /**
          * Creates new canceller that runs provided {@code runnable} before invoking this {@link #cancel()}.
          *
-         * @param runnable to be executed before this {@link Canceller}
+         * @param runnable to be executed before this {@link Receipt}
          * @return new canceller
          */
-        default Canceller onCancel(final Runnable runnable) {
+        default Receipt onCancel(final Runnable runnable) {
             return () -> {
                 runnable.run();
                 cancel();

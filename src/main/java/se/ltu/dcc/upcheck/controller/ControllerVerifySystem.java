@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  * Controls interactions between {@link ViewVerifySystem} instance and model.
  */
 public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
-    private final AtomicReference<Promise.Canceller> atomicReportGenerationCanceller = new AtomicReference<>();
+    private final AtomicReference<Promise.Receipt> atomicReportGenerationCanceller = new AtomicReference<>();
     private final UppaalProxy uppaalProxy;
 
     /**
@@ -152,7 +152,7 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                                 })
                                 .collect(Collectors.toList());
 
-                        final Promise.Canceller canceller = Promises.await(requestPromises)
+                        final Promise.Receipt receipt = Promises.await(requestPromises)
                                 .thenFilter(results -> {
                                     final boolean isSuggestingFixes = results.contains(UppaalQueryResult.Status.FALSE);
                                     if (!isSuggestingFixes) {
@@ -196,7 +196,7 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                                 });
 
                         view.setQueriesStatus(ViewVerifySystem.Status.PENDING, null);
-                        atomicReportGenerationCanceller.set(canceller);
+                        atomicReportGenerationCanceller.set(receipt);
 
                     } catch (final RuntimeException e) {
                         final Throwable cause = e.getCause();
@@ -227,9 +227,9 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
     }
 
     private void cancelReportGeneration() {
-        final Promise.Canceller canceller = atomicReportGenerationCanceller.getAndSet(null);
-        if (canceller != null) {
-            canceller.cancel();
+        final Promise.Receipt receipt = atomicReportGenerationCanceller.getAndSet(null);
+        if (receipt != null) {
+            receipt.cancel();
         }
     }
 

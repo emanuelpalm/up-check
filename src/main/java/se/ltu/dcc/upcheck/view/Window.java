@@ -18,7 +18,7 @@ import java.util.Optional;
 /**
  * Holds and renders a single {@link WindowView}.
  */
-class Window implements se.ltu.dcc.upcheck.view.Renderer<WindowView> {
+class Window implements Renderer<WindowView> {
     private final JFrame frame = new JFrame("UpCheck") {{
         setIconImages(Arrays.asList(
                 ResourceLoader.loadImage("icon/icon_16x16.png"),
