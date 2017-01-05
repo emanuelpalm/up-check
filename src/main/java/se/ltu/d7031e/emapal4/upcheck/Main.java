@@ -10,6 +10,9 @@ import se.ltu.d7031e.emapal4.upcheck.model.user.UserData;
 import se.ltu.d7031e.emapal4.upcheck.view.Renderer;
 import se.ltu.d7031e.emapal4.upcheck.view.Renderers;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Application main class.
  * <p>
@@ -32,8 +35,12 @@ public final class Main {
         System.out.println("UpCheck - Running ...");
 
         final Renderer<?> renderer = Renderers.CreateWindowRenderer();
-        renderer.onClose().subscribe(nil -> System.exit(0));
-
+        renderer.onClose().subscribe(nil -> Executors.newSingleThreadScheduledExecutor()
+                .schedule(
+                        () -> System.exit(0),
+                        500,
+                        TimeUnit.MILLISECONDS)
+        );
         final Navigator navigator = new Navigator(renderer);
         try {
             final String uppaalPath = UserData.uppaalFolderRoot();
