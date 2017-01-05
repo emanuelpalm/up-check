@@ -66,6 +66,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     private JButton buttonReportCancel;
     private JButton buttonReportClear;
     private JButton buttonReportGenerate;
+    private JProgressBar progressBarReportGeneration;
     private JTextArea textAreaReport;
 
     public WindowViewVerifySystem() {
@@ -220,6 +221,9 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                                 onReportClear.publish(null);
                             });
                         }});
+                    }});
+                    add(progressBarReportGeneration = new JProgressBar() {{
+                        setEnabled(false);
                     }});
                     add(new JPanel() {{
                         setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
@@ -405,6 +409,8 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
         labelQueriesStatus.setForeground(Styles.COLOR_ERROR);
         buttonReportCancel.setEnabled(false);
         buttonReportGenerate.setEnabled(true);
+        progressBarReportGeneration.setEnabled(false);
+        progressBarReportGeneration.setIndeterminate(false);
     }
 
     private void setQueriesStatusOK(final String queriesName) {
@@ -412,11 +418,15 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
         labelQueriesStatus.setText(queriesName != null ? queriesName + " " : " ");
         buttonReportCancel.setEnabled(false);
         buttonReportGenerate.setEnabled(true);
+        progressBarReportGeneration.setEnabled(false);
+        progressBarReportGeneration.setIndeterminate(false);
     }
 
     private void setSystemStatusPending() {
         buttonReportCancel.setEnabled(true);
         buttonReportGenerate.setEnabled(false);
+        progressBarReportGeneration.setEnabled(true);
+        progressBarReportGeneration.setIndeterminate(true);
     }
 
     @Override
