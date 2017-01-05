@@ -22,6 +22,27 @@ public class Promise<V> {
     }
 
     /**
+     * Creates new cancellable promise of given runnable.
+     * <p>
+     * Any promise cancel requests are ignored.
+     *
+     * @param runnable to be executed when promise is awaited
+     * @return new promise
+     */
+    public static Promise<Void> cancellableOf(final Runnable runnable) {
+        return new Promise<>(new Task<Void>() {
+            @Override
+            public void execute(OnResult<Void> onResult) {
+                runnable.run();
+                onResult.onSuccess(null);
+            }
+
+            @Override
+            public void cancel() {}
+        });
+    }
+
+    /**
      * Registers result handler.
      *
      * @param onResult handler to receive promise result
