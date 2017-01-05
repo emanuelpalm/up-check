@@ -120,7 +120,7 @@ public class UppaalDocumentFixer {
             }
 
             @Override
-            public void abort() {
+            public void cancel() {
                 if (isAborted.compareAndSet(false, true)) {
                     final Future<?> future = atomicFuture.get();
                     if (future != null) {

@@ -36,7 +36,7 @@ public class Promise<V> {
             } catch (final Throwable exception) {
                 onResult.onFailure(exception);
             }
-            return task::abort;
+            return task::cancel;
         }
         throw new IllegalStateException("Promise already executed.");
     }
@@ -56,10 +56,10 @@ public class Promise<V> {
         void execute(final OnResult<V> onResult);
 
         /**
-         * Aborts task, if the operation is supported.
+         * Cancels task, if the operation is supported.
          */
-        default void abort() {
-            throw new IllegalStateException("Task abortion not supported.");
+        default void cancel() {
+            throw new IllegalStateException("Promise task cancellation not supported.");
         }
     }
 
