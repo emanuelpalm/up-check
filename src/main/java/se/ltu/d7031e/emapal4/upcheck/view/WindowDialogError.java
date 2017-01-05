@@ -82,9 +82,7 @@ class WindowDialogError {
             {
                 final JButton buttonOk = new JButton("OK");
                 buttonOk.addActionListener(e -> dialog.dispose());
-                buttonOk.setBorder(Styles.BORDER_EMPTY_FIELD);
                 buttonOk.setFocusPainted(false);
-                buttonOk.setFont(Styles.FONT_PARAGRAPH);
 
                 final JPanel panelOk = new JPanel(new BorderLayout());
                 panelOk.setBackground(Styles.COLOR_ERROR);
