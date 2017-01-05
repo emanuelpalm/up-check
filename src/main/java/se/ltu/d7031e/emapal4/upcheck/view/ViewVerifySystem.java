@@ -32,6 +32,11 @@ public interface ViewVerifySystem extends View {
     EventPublisher<Queries> onReportRequest();
 
     /**
+     * @return UPPAAL system report request cancellation event publisher
+     */
+    EventPublisher<Void> onReportRequestCanceled();
+
+    /**
      * @return UPPAAL folder selection request event publisher
      */
     EventPublisher<Void> onMenuUppaalSelectInstallation();
@@ -77,6 +82,7 @@ public interface ViewVerifySystem extends View {
         NOT_PROVIDED,
         NOT_VALID,
         OK,
+        PENDING,
     }
 
     /**

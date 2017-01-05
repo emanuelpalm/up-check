@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Holds a collection of UPPAAL queries that may be asked against some {@link UppaalSystem} using a {@link UppaalProxy}.
@@ -104,6 +106,13 @@ public class UppaalQueries implements Iterable<UppaalQuery> {
             queries = newQueries;
             onUpdated.publish(this);
         }
+    }
+
+    /**
+     * @return stream of UPPAAL queries
+     */
+    public Stream<UppaalQuery> asStream() {
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator(), Spliterator.ORDERED), false);
     }
 
     /**

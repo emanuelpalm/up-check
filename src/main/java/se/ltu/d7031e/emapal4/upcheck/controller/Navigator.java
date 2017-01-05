@@ -5,11 +5,13 @@ import se.ltu.d7031e.emapal4.upcheck.view.Renderers;
 import se.ltu.d7031e.emapal4.upcheck.view.View;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Allows {@link Controller}s to navigate between different {@link View}/{@link Controller} pairs.
  */
 public class Navigator {
+    private final AtomicReference<Controller<? extends View>> atomicController = new AtomicReference<>();
     private final Renderer<? extends View> renderer;
     private final Method rendererMethodSetView;
 
@@ -25,6 +27,9 @@ public class Navigator {
 
             rendererMethodSetView.setAccessible(true);
 
+            renderer.onClose()
+                    .subscribe(nil -> navigateTo(null));
+
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
@@ -37,20 +42,28 @@ public class Navigator {
      * called. If such an operation would fail, an appropriate exception is thrown.
      *
      * @param controller Controller to navigate to.
-     * @throws ReflectiveOperationException A reflection operation failed.
      */
-    public void navigateTo(final Controller<? extends View> controller) throws ReflectiveOperationException {
-        if (controller == null) {
-            rendererMethodSetView.invoke(renderer, new Object[]{null});
-            return;
-        }
-        final Class<? extends View> viewClass = controller.viewClass();
-        final Method controllerMethodRegister = controller
-                .getClass()
-                .getMethod("register", Navigator.class, viewClass);
+    public void navigateTo(final Controller<? extends View> controller) {
+        try {
+            if (controller == null) {
+                rendererMethodSetView.invoke(renderer, new Object[]{null});
 
-        final Object view = Renderers.CreateView(viewClass);
-        controllerMethodRegister.invoke(controller, this, view);
-        rendererMethodSetView.invoke(renderer, view);
+            } else {
+                final Class<? extends View> viewClass = controller.viewClass();
+                final Method controllerMethodRegister = controller
+                        .getClass()
+                        .getMethod("register", Navigator.class, viewClass);
+
+                final Object view = Renderers.CreateView(viewClass);
+                controllerMethodRegister.invoke(controller, this, view);
+                rendererMethodSetView.invoke(renderer, view);
+            }
+        } catch (final ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+        final Controller<? extends View> previousController = atomicController.getAndSet(controller);
+        if (previousController != null) {
+            previousController.unregister();
+        }
     }
 }

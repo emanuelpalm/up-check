@@ -5,6 +5,7 @@ import se.ltu.d7031e.emapal4.upcheck.Main;
 import se.ltu.d7031e.emapal4.upcheck.model.uppaal.*;
 import se.ltu.d7031e.emapal4.upcheck.model.user.UserData;
 import se.ltu.d7031e.emapal4.upcheck.util.Promise;
+import se.ltu.d7031e.emapal4.upcheck.util.Promises;
 import se.ltu.d7031e.emapal4.upcheck.view.ViewVerifySystem;
 
 import java.io.UncheckedIOException;
@@ -13,15 +14,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Controls interactions between {@link ViewVerifySystem} instance and model.
  */
 public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
+    private final AtomicReference<Promise.Canceller> atomicReportGenerationCanceller = new AtomicReference<>();
     private final UppaalProxy uppaalProxy;
 
     /**
@@ -115,70 +117,100 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
             view.addReport("=> Generating new UPPAAL report ...\r\n");
             uppaalQueries.update(queries.data());
         };
+        final Consumer<Void> cancelReportGeneration = nil -> cancelReportGeneration();
         final Consumer<Void> reselectUppaalInstallationFolder = nil -> resetAndReboot();
 
         view.onSystemPath().subscribe(setSystemPath);
         view.onQueriesPath().subscribe(setQueriesPath);
         view.onQueriesSave().subscribe(saveQueries);
         view.onReportRequest().subscribe(generateReport);
+        view.onReportRequestCanceled().subscribe(cancelReportGeneration);
         view.onMenuUppaalSelectInstallation().subscribe(reselectUppaalInstallationFolder);
 
-        final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        uppaalQueries.onUpdated().subscribe(queries -> {
-            try {
-                final UppaalSystem uppaalSystem = atomicUppaalSystem.get();
-                if (uppaalSystem == null) {
-                    view.addReport("!> No available UPPAAL system. Nothing to report.\r\n");
-                    return;
-                }
-                boolean isSuggestingFixes = false;
-                for (final UppaalQuery query : queries) {
-                    final UppaalQueryRequest request = uppaalProxy.request(uppaalSystem, query);
-                    final UppaalQueryResult result = request.submit();
-                    final UppaalQueryResult.Status status = result.status();
-                    if (status == UppaalQueryResult.Status.FALSE) {
-                        isSuggestingFixes = true;
-                    }
-                    view.addReport("#> Executing: " + query + "\r\n   Result: " + status + "\r\n");
-                }
-                if (!isSuggestingFixes) {
-                    view.addReport("!> All queries satisfied.\r\n");
-                    return;
-                }
-                final Duration timeout = Duration.ofSeconds(10);
-                view.addReport("#> Attempting to find valid system fixes for at most " + timeout.getSeconds() + " seconds ...");
-                new UppaalDocumentFixer(uppaalProxy, uppaalSystem, uppaalQueries)
-                        .addStrategy(new UppaalDocumentFixerStrategyRemoveEdges())
-                        .setTimeout(timeout)
-                        .execute(executorService)
-                        .then(new Promise.OnResult<UppaalDocumentFixerReport>() {
-                            @Override
-                            public void onSuccess(final UppaalDocumentFixerReport fixerReport) {
-                                if (fixerReport.isEmpty()) {
-                                    view.addReport("!> No possible fixes could be determined.\r\n");
-                                } else {
-                                    view.addReport("!> The following changes satisfy all system queries:");
-                                    for (final UppaalDocumentFix fix : fixerReport) {
-                                        view.addReport("   -> " + fix);
+        uppaalQueries.onUpdated()
+                .subscribe(queries -> {
+                    try {
+                        final UppaalSystem uppaalSystem = atomicUppaalSystem.get();
+                        if (uppaalSystem == null) {
+                            view.addReport("!> No available UPPAAL system. Nothing to report.\r\n");
+                            return;
+                        }
+                        final List<Promise<UppaalQueryResult.Status>> requestPromises = queries.asStream()
+                                .map(query -> {
+                                    try {
+                                        final UppaalQueryRequest request = uppaalProxy.request(uppaalSystem, query);
+                                        return Promise.cancellableOf(() -> view.addReport("#> Executing query: " + query))
+                                                .thenAwait(request.submit())
+                                                .thenMap(requestResult -> {
+                                                    final UppaalQueryResult.Status status = requestResult.status();
+                                                    view.addReport("   Result: " + status + "\r\n");
+                                                    return status;
+                                                });
+                                    } catch (final UppaalQueryException e) {
+                                        throw new RuntimeException(e);
                                     }
-                                    view.addReport("");
-                                }
-                            }
+                                })
+                                .collect(Collectors.toList());
 
-                            @Override
-                            public void onFailure(final Throwable exception) {
-                                exception.printStackTrace();
-                                view.addReport("!> " + exception.getLocalizedMessage() + "\r\n");
-                            }
-                        });
-            } catch (final UppaalQueryException e) {
-                e.printStackTrace();
-                view.addReport("!> Report generation failed. Reason: " + e.getLocalizedMessage() + "\r\n");
+                        final Promise.Canceller canceller = Promises.await(requestPromises)
+                                .thenFilter(results -> {
+                                    final boolean isSuggestingFixes = results.contains(UppaalQueryResult.Status.FALSE);
+                                    if (!isSuggestingFixes) {
+                                        view.addReport("!> All queries satisfied.\r\n");
+                                    }
+                                    return isSuggestingFixes;
+                                })
+                                .thenFlatMap(ignored -> {
+                                    final Duration timeout = Duration.ofSeconds(10);
+                                    view.addReport("#> Attempting to find valid system fixes for at most " + timeout.getSeconds() + " seconds ...");
+                                    return new UppaalDocumentFixer(uppaalProxy, uppaalSystem, uppaalQueries)
+                                            .addStrategy(new UppaalDocumentFixerStrategyRemoveEdges())
+                                            .setTimeout(timeout)
+                                            .execute();
+                                })
+                                .then(new Promise.OnResult<UppaalDocumentFixerReport>() {
+                                    @Override
+                                    public void onSuccess(final UppaalDocumentFixerReport fixerReport) {
+                                        if (fixerReport.isEmpty()) {
+                                            view.addReport("!> No possible fixes could be determined.\r\n");
+                                        } else {
+                                            view.addReport("!> The following changes satisfy all system queries:");
+                                            for (final UppaalDocumentFix fix : fixerReport) {
+                                                view.addReport("   -> " + fix);
+                                            }
+                                            view.addReport("");
+                                            view.setQueriesStatus(ViewVerifySystem.Status.OK, null);
+                                        }
+                                    }
 
-            } catch (final Throwable e) {
-                view.showException(null, e);
-            }
-        });
+                                    @Override
+                                    public void onFailure(final Throwable exception) {
+                                        exception.printStackTrace();
+                                        view.addReport("!> " + exception.getLocalizedMessage() + "\r\n");
+                                        view.setQueriesStatus(ViewVerifySystem.Status.OK, null);
+                                    }
+                                })
+                                .onCancel(() -> {
+                                    view.addReport("!> Report generation cancelled.\r\n");
+                                    view.setQueriesStatus(ViewVerifySystem.Status.OK, null);
+                                });
+
+                        view.setQueriesStatus(ViewVerifySystem.Status.PENDING, null);
+                        atomicReportGenerationCanceller.set(canceller);
+
+                    } catch (final RuntimeException e) {
+                        final Throwable cause = e.getCause();
+                        if (cause != null && cause instanceof UppaalQueryException) {
+                            e.printStackTrace();
+                            view.addReport("!> Report generation failed. Reason: " + e.getLocalizedMessage() + "\r\n");
+
+                        } else {
+                            throw e;
+                        }
+                    } catch (final Throwable e) {
+                        view.showException(null, e);
+                    }
+                });
 
         // Initialize.
         {
@@ -192,6 +224,18 @@ public class ControllerVerifySystem implements Controller<ViewVerifySystem> {
                 setQueriesPath.accept(lastQueriesPathString);
             }
         }
+    }
+
+    private void cancelReportGeneration() {
+        final Promise.Canceller canceller = atomicReportGenerationCanceller.getAndSet(null);
+        if (canceller != null) {
+            canceller.cancel();
+        }
+    }
+
+    @Override
+    public void unregister() {
+        cancelReportGeneration();
     }
 
     private void resetAndReboot() {

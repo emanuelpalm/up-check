@@ -17,6 +17,11 @@ interface Controller<V extends View> {
     void register(final Navigator navigator, final V view);
 
     /**
+     * Called to indicate that controller has been disassociated from a previously registered view.
+     */
+    default void unregister() {}
+
+    /**
      * @return Class of controlled {@link View}.
      */
     Class<V> viewClass();

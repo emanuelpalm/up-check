@@ -8,10 +8,9 @@ import se.ltu.d7031e.emapal4.upcheck.util.Promise;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * UPPAAL {@link Document} fix suggester.
@@ -22,6 +21,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * Note that the object is immutable. Any change to the object produces a modified shallow copy.
  */
 public class UppaalDocumentFixer {
+    private static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
+
     private final Context context;
     private final Duration timeout;
     private final Chain<UppaalDocumentFixerStrategy> strategies;
@@ -60,32 +61,30 @@ public class UppaalDocumentFixer {
      *
      * @param timeout timeout duration
      * @return updated UPPAAL system fixer object
-     * @see #execute(ExecutorService)
+     * @see #execute()
      */
     public UppaalDocumentFixer setTimeout(final Duration timeout) {
         return new UppaalDocumentFixer(context, timeout, strategies);
     }
 
     /**
-     * Starts evaluating strategies using provided {@code executorService}, returning promise of eventual result.
+     * Starts evaluating strategies, returning promise of eventual result.
      * <p>
      * Evaluation will never run longer than a duration set using {@link #setTimeout(Duration)}. In case of employing
      * multiple {@link UppaalDocumentFixerStrategy} objects, each is given an equal share of the time to execute.
      *
-     * @param executorService evaluation executor service
      * @return promise of an eventual report
      */
-    public Promise<UppaalDocumentFixerReport> execute(final ExecutorService executorService) {
+    public Promise<UppaalDocumentFixerReport> execute() {
         return new Promise<>(new Promise.Task<UppaalDocumentFixerReport>() {
             private final AtomicBoolean isAborted = new AtomicBoolean(false);
-            private final AtomicReference<Future<?>> atomicFuture = new AtomicReference<>();
 
             @Override
             public void execute(final Promise.OnResult<UppaalDocumentFixerReport> onResult) {
                 if (isAborted.get()) {
                     return;
                 }
-                atomicFuture.set(executorService.submit(() -> {
+                EXECUTOR.execute(() -> {
                     final UppaalDocumentFixerReport report = new UppaalDocumentFixerReport();
                     final Duration strategyTimeout = timeout.dividedBy(strategies.size());
                     for (final UppaalDocumentFixerStrategy strategy : strategies) {
@@ -101,13 +100,22 @@ public class UppaalDocumentFixer {
                                         if (Instant.now().isAfter(strategyDeadline)) {
                                             throw new UppaalDocumentFixerTimeoutException();
                                         }
+                                        if (isAborted.get()) {
+                                            throw new AbortedException();
+                                        }
                                     });
-                                    final UppaalQueryResult result = request.submit();
-                                    if (result.status() != UppaalQueryResult.Status.TRUE) {
+                                    if (isAborted.get()) {
+                                        return false;
+                                    }
+                                    final UppaalQueryResult result = request.submit().await();
+                                    if (isAborted.get() || result.status() != UppaalQueryResult.Status.TRUE) {
                                         return false;
                                     }
                                 }
-                            } catch (final UppaalProxyException | UppaalQueryException e) {
+                            } catch (final AbortedException e) {
+                                return false;
+
+                            } catch (final Throwable e) {
                                 e.printStackTrace();
                                 return false;
                             }
@@ -116,20 +124,17 @@ public class UppaalDocumentFixer {
                         report.add(modifications);
                     }
                     onResult.onSuccess(report);
-                }));
+                });
             }
 
             @Override
             public void cancel() {
-                if (isAborted.compareAndSet(false, true)) {
-                    final Future<?> future = atomicFuture.get();
-                    if (future != null) {
-                        future.cancel(true);
-                    }
-                }
+                isAborted.set(true);
             }
         });
     }
+
+    private static class AbortedException extends RuntimeException {}
 
     private static class Context {
         final UppaalProxy proxy;

@@ -51,6 +51,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     private final EventBroker<ViewVerifySystem.Queries> onQueriesSave = new EventBroker<>();
     private final EventBroker<Void> onReportClear = new EventBroker<>();
     private final EventBroker<ViewVerifySystem.Queries> onReportRequest = new EventBroker<>();
+    private final EventBroker<Void> onReportRequestCanceled = new EventBroker<>();
     private final EventBroker<Void> onMenuUppaalSelectInstallation = new EventBroker<>();
 
     private JLabel labelSystemStatus;
@@ -62,6 +63,7 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     private JLabel labelQueriesStatus;
     private JTextArea textAreaQueries;
 
+    private JButton buttonReportCancel;
     private JButton buttonReportClear;
     private JButton buttonReportGenerate;
     private JTextArea textAreaReport;
@@ -204,6 +206,12 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                                     textAreaQueries.getText())));
                         }});
                         add(Box.createHorizontalStrut(Styles.SPACING_SMALL));
+                        add(buttonReportCancel = new JButton("Cancel") {{
+                            setEnabled(false);
+                            setFocusPainted(false);
+                            addActionListener(evt -> onReportRequestCanceled.publish(null));
+                        }});
+                        add(Box.createHorizontalStrut(Styles.SPACING_SMALL));
                         add(buttonReportClear = new JButton("Clear") {{
                             setEnabled(false);
                             setFocusPainted(false);
@@ -273,6 +281,11 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     @Override
     public EventPublisher<ViewVerifySystem.Queries> onReportRequest() {
         return onReportRequest;
+    }
+
+    @Override
+    public EventPublisher<Void> onReportRequestCanceled() {
+        return onReportRequestCanceled;
     }
 
     @Override
@@ -357,10 +370,17 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
     @Override
     public void setQueriesStatus(final Status status, final String queriesName) {
         SwingUtilities.invokeLater(() -> {
-            if (status == Status.OK) {
-                setQueriesStatusOK(queriesName);
-            } else {
-                setQueriesStatusError(status, queriesName);
+            switch (status) {
+                case OK:
+                    setQueriesStatusOK(queriesName);
+                    return;
+
+                case PENDING:
+                    setSystemStatusPending();
+                    return;
+
+                default:
+                    setQueriesStatusError(status, queriesName);
             }
         });
     }
@@ -383,20 +403,25 @@ class WindowViewVerifySystem extends WindowView implements ViewVerifySystem {
                 throw new IllegalStateException("Unhandled status: " + status);
         }
         labelQueriesStatus.setForeground(Styles.COLOR_ERROR);
+        buttonReportCancel.setEnabled(false);
+        buttonReportGenerate.setEnabled(true);
     }
 
     private void setQueriesStatusOK(final String queriesName) {
-        SwingUtilities.invokeLater(() -> {
-            labelQueriesStatus.setForeground(Styles.COLOR_FOREGROUND_PRIMARY);
-            labelQueriesStatus.setText(queriesName != null ? queriesName + " " : " ");
-        });
+        labelQueriesStatus.setForeground(Styles.COLOR_FOREGROUND_PRIMARY);
+        labelQueriesStatus.setText(queriesName != null ? queriesName + " " : " ");
+        buttonReportCancel.setEnabled(false);
+        buttonReportGenerate.setEnabled(true);
+    }
+
+    private void setSystemStatusPending() {
+        buttonReportCancel.setEnabled(true);
+        buttonReportGenerate.setEnabled(false);
     }
 
     @Override
     public void addReport(final String report) {
-        SwingUtilities.invokeLater(() -> {
-            textAreaReport.setEnabled(true);
-            textAreaReport.append(report + "\r\n");
-        });
+        textAreaReport.setEnabled(true);
+        textAreaReport.append(report + "\r\n");
     }
 }
