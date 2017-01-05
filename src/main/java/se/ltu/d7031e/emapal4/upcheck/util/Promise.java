@@ -99,5 +99,18 @@ public class Promise<V> {
          * @throws IllegalStateException if aborting is not supported by cancelled promise
          */
         void cancel();
+
+        /**
+         * Creates new canceller that runs provided {@code runnable} before invoking this {@link #cancel()}.
+         *
+         * @param runnable to be executed before this {@link Canceller}
+         * @return new canceller
+         */
+        default Canceller onCancel(final Runnable runnable) {
+            return () -> {
+                runnable.run();
+                cancel();
+            };
+        }
     }
 }
