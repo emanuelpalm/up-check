@@ -24,10 +24,6 @@ public class EventBroker<Event> implements EventPublisher<Event> {
             subscribers = new ArrayList<>(1);
         }
         subscribers.add(subscriber);
-        return () -> {
-            if (subscribers != null) {
-                subscribers.remove(subscriber);
-            }
-        };
+        return () -> subscribers.remove(subscriber);
     }
 }
