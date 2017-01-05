@@ -1,7 +1,9 @@
 package se.ltu.d7031e.emapal4.upcheck.util;
 
 import java.util.Objects;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A promise that some value will become available at some point in the future.
@@ -40,6 +42,39 @@ public class Promise<V> {
             @Override
             public void cancel() {}
         });
+    }
+
+    /**
+     * Awaits promise result, blocking current thread until it becomes available.
+     *
+     * @return if successful, promise result
+     * @throws Throwable if unsuccessful, promise exception
+     */
+    public V await() throws Throwable {
+        final Semaphore semaphore = new Semaphore(0);
+        final AtomicReference<V> atomicValue = new AtomicReference<>(null);
+        final AtomicReference<Throwable> atomicException = new AtomicReference<>(null);
+
+        then(new OnResult<V>() {
+            @Override
+            public void onSuccess(final V value) {
+                atomicValue.set(value);
+                semaphore.release();
+            }
+
+            @Override
+            public void onFailure(final Throwable exception) {
+                atomicException.set(exception);
+                semaphore.release();
+            }
+        });
+        semaphore.acquire();
+
+        final Throwable exception = atomicException.get();
+        if (exception != null) {
+            throw exception;
+        }
+        return atomicValue.get();
     }
 
     /**
