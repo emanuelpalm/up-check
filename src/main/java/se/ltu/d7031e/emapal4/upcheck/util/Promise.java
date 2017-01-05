@@ -1,5 +1,6 @@
 package se.ltu.d7031e.emapal4.upcheck.util;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -27,6 +28,7 @@ public class Promise<V> {
      * @return promise cancellation object
      */
     public Canceller then(final OnResult<V> onResult) {
+        Objects.requireNonNull(onResult);
         if (isExecuted.compareAndSet(false, true)) {
             try {
                 task.execute(onResult);
