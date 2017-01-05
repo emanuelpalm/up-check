@@ -22,7 +22,7 @@ __View Behaviour__ is relevant only to the view itself, and for this reason only
 
 Views are never to depend on any classes inside the `se.ltu.dcc.upcheck.model` or `se.ltu.dcc.upcheck.controller` packages.
 
-Some significant classes, from an architectural standpoint, are [Renderer][view-renderer], [Renderers][view-renderers], [View][view-view], [Window][view-window] and [WindowView][view-view].
+Some significant classes, from an architectural standpoint, are [Renderer][view-renderer], [Renderers][view-renderers], [View][view-view], [Window][view-window] and [WindowView][view-window-view].
 
 [view-renderer]: ../src/main/java/se/ltu/dcc/upcheck/view/Renderer.java
 [view-renderers]: ../src/main/java/se/ltu/dcc/upcheck/view/Renderers.java
